@@ -1,36 +1,183 @@
-<!doctype html>
-<html lang="zh-CN">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>DancingStoreSdk</title>
-    <style>
-      body { margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0b1020; color: #e2e8f0; }
-      .wrap { max-width: 860px; margin: 0 auto; padding: 44px 20px; }
-      h1 { margin: 0 0 8px; font-size: 34px; color: #67e8f9; }
-      p { color: #94a3b8; line-height: 1.6; }
-      .block { margin-top: 18px; padding: 14px 16px; border: 1px solid #1f2937; border-radius: 12px; background: #111827; }
-      ul { margin: 8px 0 0; color: #cbd5e1; }
-      code { background: #1f2937; border-radius: 6px; padding: 2px 6px; }
-    </style>
-  </head>
-  <body>
-    <div class="wrap">
-      <h1>DancingStoreSdk</h1>
-      <p>职责：舞蹈商店领域 SDK。提供商品/订单/授权模型、API 客户端、错误映射与发布包能力。</p>
-      <div class="block">
-        <strong>Core Exports</strong>
-        <ul>
-          <li><code>DancingStoreClient</code></li>
-          <li><code>StoreItem</code> / <code>StoreOrder</code> / Query Types</li>
-        </ul>
-      </div>
-      <div class="block">
-        <strong>Out of Scope</strong>
-        <ul>
-          <li>宿主 UI、插件加载器、音乐商店逻辑</li>
-        </ul>
-      </div>
-    </div>
-  </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DancingStoreSdk — Documentation</title>
+  <style>
+    :root {
+      --bg: #fafafa; --surface: #ffffff; --fg: #0f0f0f; --fg-2: #1a1a1a;
+      --muted: #6b6b6b; --meta: #888888;
+      --border: #e5e5e5; --border-soft: #f0f0f0;
+      --accent: #2f6feb; --accent-on: #ffffff;
+      --radius-sm: 8px; --radius-md: 12px;
+      --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+      --space-5: 20px; --space-6: 24px; --space-8: 32px; --space-12: 48px;
+      --text-xs: 12px; --text-sm: 14px; --text-base: 16px;
+      --text-lg: 20px; --text-xl: 24px; --text-2xl: 32px;
+      --leading-body: 1.6; --leading-tight: 1.25;
+      --motion-fast: 150ms; --ease: cubic-bezier(0.2, 0, 0, 1);
+      --nav-w: 220px; --toc-w: 200px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: var(--text-base); line-height: var(--leading-body); color: var(--fg); background: var(--bg); }
+    .doc-layout { display: grid; grid-template-columns: var(--nav-w) minmax(0,1fr) var(--toc-w); min-height: 100vh; }
+    .doc-nav { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid var(--border); background: var(--surface); padding: var(--space-6) 0; }
+    .doc-nav-brand { padding: 0 var(--space-5); margin-bottom: var(--space-6); }
+    .doc-nav-brand h2 { font-size: var(--text-sm); font-weight: 600; color: var(--fg); }
+    .doc-nav-brand span { font-size: var(--text-xs); color: var(--meta); display: block; margin-top: var(--space-1); }
+    .nav-group-label { font-size: 11px; font-weight: 600; color: var(--meta); text-transform: uppercase; letter-spacing: .06em; padding: var(--space-4) var(--space-5) var(--space-2); }
+    .nav-link { display: block; padding: 6px var(--space-5); font-size: var(--text-sm); color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: color var(--motion-fast) var(--ease), border-color var(--motion-fast) var(--ease); }
+    .nav-link:hover { color: var(--fg); }
+    .nav-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
+    .doc-article { padding: var(--space-12) var(--space-8); max-width: 780px; margin: 0 auto; }
+    .doc-article h1 { font-size: var(--text-2xl); font-weight: 700; line-height: var(--leading-tight); letter-spacing: -.02em; color: var(--fg); margin-bottom: var(--space-4); }
+    .doc-article h2 { font-size: var(--text-xl); font-weight: 600; line-height: var(--leading-tight); color: var(--fg); margin-top: var(--space-12); margin-bottom: var(--space-4); padding-bottom: var(--space-3); border-bottom: 1px solid var(--border-soft); }
+    .doc-article h3 { font-size: var(--text-lg); font-weight: 600; color: var(--fg-2); margin-top: var(--space-8); margin-bottom: var(--space-3); }
+    .doc-article p { color: var(--fg-2); margin-bottom: var(--space-4); }
+    .doc-article ul, .doc-article ol { margin-bottom: var(--space-4); padding-left: var(--space-6); color: var(--fg-2); }
+    .doc-article li { margin-bottom: var(--space-2); }
+    .doc-article a { color: var(--accent); text-decoration: none; }
+    .doc-article a:hover { text-decoration: underline; }
+    .badge { display: inline-block; font-size: var(--text-xs); font-weight: 500; padding: 2px 8px; border-radius: 9999px; background: color-mix(in oklab, var(--accent), transparent 88%); color: var(--accent); vertical-align: middle; margin-left: var(--space-2); }
+    code { font-family: ui-monospace, "JetBrains Mono", "Fira Code", monospace; font-size: .875em; background: var(--border-soft); padding: 2px 6px; border-radius: 4px; color: var(--fg); }
+    pre { background: #1e1e1e; color: #d4d4d4; border-radius: var(--radius-sm); padding: var(--space-5); overflow-x: auto; margin-bottom: var(--space-6); font-size: var(--text-sm); line-height: 1.55; }
+    pre code { background: none; padding: 0; border-radius: 0; color: inherit; font-size: inherit; }
+    .kw { color: #c586c0; } .tp { color: #4ec9b0; } .str { color: #ce9178; } .cm { color: #6a9955; } .fn { color: #dcdcaa; } .nr { color: #b5cea8; }
+    .api-table { width: 100%; border-collapse: collapse; margin-bottom: var(--space-6); font-size: var(--text-sm); }
+    .api-table th { text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--meta); padding: var(--space-3) var(--space-4); border-bottom: 2px solid var(--border); }
+    .api-table td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--border-soft); color: var(--fg-2); vertical-align: top; }
+    .api-table td:first-child { font-weight: 500; color: var(--fg); white-space: nowrap; }
+    .api-table td code { font-size: .85em; }
+    .doc-toc { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-left: 1px solid var(--border); padding: var(--space-12) var(--space-5) var(--space-6); background: var(--bg); }
+    .doc-toc-title { font-size: 11px; font-weight: 600; color: var(--meta); text-transform: uppercase; letter-spacing: .06em; margin-bottom: var(--space-4); }
+    .toc-link { display: block; padding: 4px 0; font-size: var(--text-sm); color: var(--muted); text-decoration: none; transition: color var(--motion-fast) var(--ease); }
+    .toc-link:hover { color: var(--fg); }
+    .toc-link.d3 { padding-left: var(--space-4); font-size: var(--text-xs); }
+    @media (max-width: 1023px) {
+      .doc-layout { grid-template-columns: 1fr; }
+      .doc-nav { position: fixed; left: -280px; width: 280px; z-index: 100; transition: left var(--motion-fast) var(--ease); box-shadow: 2px 0 12px rgba(0,0,0,.08); }
+      .doc-nav.open { left: 0; } .doc-toc { display: none; } .doc-article { padding: var(--space-8) var(--space-4); } .menu-btn { display: flex; }
+    }
+    @media (min-width: 1024px) { .menu-btn { display: none; } .nav-overlay { display: none !important; } }
+    .menu-btn { position: fixed; top: var(--space-4); left: var(--space-4); z-index: 101; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); cursor: pointer; align-items: center; justify-content: center; color: var(--fg); font-size: 18px; }
+    .nav-overlay { position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,.2); display: none; }
+    .nav-overlay.show { display: block; }
+  </style>
+</head>
+<body>
+<button class="menu-btn" onclick="toggleNav()" aria-label="Menu">&#9776;</button>
+<div class="nav-overlay" id="ov" onclick="toggleNav()"></div>
+<div class="doc-layout">
+
+  <nav class="doc-nav" id="nav">
+    <div class="doc-nav-brand"><h2>DancingStoreSdk</h2><span>v1.0.0</span></div>
+    <div class="nav-group-label">Guide</div>
+    <a class="nav-link active" href="#getting-started">Getting Started</a>
+    <a class="nav-link" href="#configuration">Configuration</a>
+    <div class="nav-group-label">API Reference</div>
+    <a class="nav-link" href="#store-client">DancingStoreClient</a>
+    <a class="nav-link" href="#store-item">StoreItem</a>
+    <a class="nav-link" href="#store-order">StoreOrder</a>
+    <a class="nav-link" href="#store-list-query">StoreListQuery</a>
+    <div class="nav-group-label">Links</div>
+    <a class="nav-link" href="https://github.com/DancingMusic/DancingStoreSdk" target="_blank">GitHub &#8599;</a>
+    <a class="nav-link" href="https://dancingmusic.github.io" target="_blank">DancingMusic &#8599;</a>
+  </nav>
+
+  <main class="doc-article">
+    <h1 id="getting-started">Getting Started</h1>
+    <p>DancingStoreSdk provides the API client, data models, and type definitions for the Dance store &mdash; covering item listing, purchasing, and order verification.</p>
+
+    <h3>Install</h3>
+<pre><code><span class="fn">npm</span> install @dancingmusic/dancing-store-sdk</code></pre>
+
+    <h3>Quick start</h3>
+<pre><code><span class="kw">import</span> { <span class="tp">DancingStoreClient</span> } <span class="kw">from</span> <span class="str">'@dancingmusic/dancing-store-sdk'</span>;
+
+<span class="kw">const</span> client = <span class="kw">new</span> <span class="tp">DancingStoreClient</span>({
+  baseUrl: <span class="str">'https://api.dancingmusic.dev/store'</span>,
+  token: <span class="str">'your-auth-token'</span>,
+});
+
+<span class="cm">// List all dance items</span>
+<span class="kw">const</span> items = <span class="kw">await</span> client.<span class="fn">list</span>({ category: <span class="str">'abstract'</span> });
+
+<span class="cm">// Purchase an item</span>
+<span class="kw">const</span> order = <span class="kw">await</span> client.<span class="fn">createOrder</span>(items[<span class="nr">0</span>].id);</code></pre>
+
+    <h2 id="configuration">Configuration</h2>
+    <p>The client accepts a <code>StoreClientOptions</code> object:</p>
+    <table class="api-table"><thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead><tbody>
+      <tr><td><code>baseUrl</code></td><td><code>string</code></td><td>Store API base URL (trailing slash is trimmed)</td></tr>
+      <tr><td><code>token</code></td><td><code>string</code></td><td>Auth token for authenticated endpoints <span class="badge">optional</span></td></tr>
+      <tr><td><code>timeoutMs</code></td><td><code>number</code></td><td>Request timeout in milliseconds <span class="badge">optional</span></td></tr>
+    </tbody></table>
+    <p>Access the resolved config via the read-only <code>client.config</code> property.</p>
+
+    <h2 id="store-client">DancingStoreClient</h2>
+    <p>The main API client class for interacting with the dance store.</p>
+    <table class="api-table"><thead><tr><th>Method</th><th>Signature</th><th>Description</th></tr></thead><tbody>
+      <tr><td><code>list</code></td><td><code>(query?: StoreListQuery) =&gt; Promise&lt;StoreItem[]&gt;</code></td><td>List store items with optional filters</td></tr>
+      <tr><td><code>get</code></td><td><code>(itemId: string) =&gt; Promise&lt;StoreItem | null&gt;</code></td><td>Get a single item by ID</td></tr>
+      <tr><td><code>createOrder</code></td><td><code>(itemId: string) =&gt; Promise&lt;StoreOrder&gt;</code></td><td>Create a purchase order</td></tr>
+      <tr><td><code>verifyOrder</code></td><td><code>(orderId: string) =&gt; Promise&lt;StoreOrder | null&gt;</code></td><td>Verify order payment status</td></tr>
+      <tr><td><code>config</code></td><td><code>{ baseUrl, hasToken }</code></td><td>Read-only resolved configuration</td></tr>
+    </tbody></table>
+
+    <h3>Error handling</h3>
+    <p>Methods throw a standard <code>Error</code> when required parameters are missing (e.g. empty <code>itemId</code>). Network errors propagate as-is from the underlying fetch implementation.</p>
+
+    <h2 id="store-item">StoreItem</h2>
+    <p>Represents a dance visualization item in the store.</p>
+    <table class="api-table"><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+      <tr><td><code>id</code></td><td><code>string</code></td><td>Unique item identifier</td></tr>
+      <tr><td><code>title</code></td><td><code>string</code></td><td>Display title</td></tr>
+      <tr><td><code>description</code></td><td><code>string</code></td><td>Item description</td></tr>
+      <tr><td><code>price</code></td><td><code>number</code></td><td>Price amount</td></tr>
+      <tr><td><code>currency</code></td><td><code>string</code></td><td>Currency code (e.g. "USD")</td></tr>
+      <tr><td><code>version</code></td><td><code>string</code></td><td>Item version</td></tr>
+      <tr><td><code>authorId</code></td><td><code>string</code></td><td>Author identifier</td></tr>
+      <tr><td><code>createdAt</code></td><td><code>string</code></td><td>ISO creation timestamp</td></tr>
+      <tr><td><code>updatedAt</code></td><td><code>string</code></td><td>ISO update timestamp</td></tr>
+    </tbody></table>
+
+    <h2 id="store-order">StoreOrder</h2>
+    <p>Represents a purchase order.</p>
+    <table class="api-table"><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+      <tr><td><code>orderId</code></td><td><code>string</code></td><td>Unique order identifier</td></tr>
+      <tr><td><code>itemId</code></td><td><code>string</code></td><td>Purchased item ID</td></tr>
+      <tr><td><code>amount</code></td><td><code>number</code></td><td>Payment amount</td></tr>
+      <tr><td><code>currency</code></td><td><code>string</code></td><td>Currency code</td></tr>
+      <tr><td><code>status</code></td><td><code>'pending' | 'paid' | 'failed' | 'refunded'</code></td><td>Order status</td></tr>
+    </tbody></table>
+
+    <h2 id="store-list-query">StoreListQuery</h2>
+    <p>Query parameters for the <code>list()</code> method.</p>
+    <table class="api-table"><thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead><tbody>
+      <tr><td><code>page</code></td><td><code>number</code></td><td>Page number <span class="badge">optional</span></td></tr>
+      <tr><td><code>pageSize</code></td><td><code>number</code></td><td>Items per page <span class="badge">optional</span></td></tr>
+      <tr><td><code>keyword</code></td><td><code>string</code></td><td>Search keyword <span class="badge">optional</span></td></tr>
+      <tr><td><code>category</code></td><td><code>string</code></td><td>Filter by category <span class="badge">optional</span></td></tr>
+    </tbody></table>
+  </main>
+
+  <aside class="doc-toc">
+    <div class="doc-toc-title">On this page</div>
+    <a class="toc-link" href="#getting-started">Getting Started</a>
+    <a class="toc-link" href="#configuration">Configuration</a>
+    <a class="toc-link" href="#store-client">DancingStoreClient</a>
+    <a class="toc-link d3" href="#store-client">Error handling</a>
+    <a class="toc-link" href="#store-item">StoreItem</a>
+    <a class="toc-link" href="#store-order">StoreOrder</a>
+    <a class="toc-link" href="#store-list-query">StoreListQuery</a>
+  </aside>
+
+</div>
+<script>
+function toggleNav(){document.getElementById('nav').classList.toggle('open');document.getElementById('ov').classList.toggle('show');}
+const ss=document.querySelectorAll('h1[id],h2[id]'),nl=document.querySelectorAll('.nav-link[href^="#"]'),tl=document.querySelectorAll('.toc-link');
+window.addEventListener('scroll',()=>{let c='';ss.forEach(s=>{if(scrollY>=s.offsetTop-80)c=s.id;});nl.forEach(l=>l.classList.toggle('active',l.getAttribute('href')==='#'+c));tl.forEach(l=>{l.style.color=l.getAttribute('href')==='#'+c?'var(--accent)':'';});},{passive:true});
+</script>
+</body>
 </html>
