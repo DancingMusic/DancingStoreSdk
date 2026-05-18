@@ -1,387 +1,1199 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="zh" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>DancingStoreSdk — Documentation</title>
+  <title>DancingStore — DancingMusic 舞蹈可视化商店</title>
   <style>
-    :root, [data-theme="light"] {
-      --bg: #fafafa; --surface: #ffffff; --fg: #0f0f0f; --fg-2: #1a1a1a;
-      --muted: #6b6b6b; --meta: #888888;
-      --border: #e5e5e5; --border-soft: #f0f0f0;
-      --accent: #2f6feb; --accent-on: #ffffff;
-      --code-bg: #1e1e1e; --code-fg: #d4d4d4;
-      --search-bg: var(--bg); --search-border: var(--border);
-      --mark-bg: #fff3bf; --mark-fg: #0f0f0f;
+    /* ── CSS Variables / Theming ── */
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans SC", system-ui, sans-serif;
+      --font-mono: "SF Mono", "Fira Code", "Cascadia Code", Menlo, Consolas, monospace;
+      --transition-speed: 0.3s;
+      --radius: 16px;
+      --radius-sm: 10px;
+      --glow-pink: rgba(236, 72, 153, 0.4);
+      --glow-purple: rgba(168, 85, 247, 0.4);
+      --glow-blue: rgba(59, 130, 246, 0.4);
+      --gradient-accent: linear-gradient(135deg, #ec4899, #a855f7, #3b82f6);
+      --gradient-accent-reverse: linear-gradient(315deg, #ec4899, #a855f7, #3b82f6);
     }
+
     [data-theme="dark"] {
-      --bg: #111111; --surface: #1a1a1a; --fg: #e5e5e5; --fg-2: #cccccc;
-      --muted: #999999; --meta: #777777;
-      --border: #2a2a2a; --border-soft: #222222;
-      --accent: #5b9bf5; --accent-on: #111111;
-      --code-bg: #0d0d0d; --code-fg: #d4d4d4;
-      --search-bg: #1a1a1a; --search-border: #333;
-      --mark-bg: #5b4a00; --mark-fg: #fef3c7;
+      --bg-primary: #0a0a0a;
+      --bg-secondary: #111118;
+      --bg-card: #1a1a2e;
+      --bg-card-hover: #22223a;
+      --bg-code: #0d0d14;
+      --bg-glass: rgba(26, 26, 46, 0.6);
+      --text-primary: #f0f0f5;
+      --text-secondary: #a0a0b8;
+      --text-muted: #6b6b80;
+      --border-color: rgba(255, 255, 255, 0.06);
+      --border-hover: rgba(255, 255, 255, 0.12);
+      --code-fg: #d4d4dc;
+      --code-keyword: #c084fc;
+      --code-string: #34d399;
+      --code-comment: #6b7280;
+      --code-type: #60a5fa;
+      --code-fn: #f9a8d4;
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+      --shadow-glow: 0 0 40px rgba(168, 85, 247, 0.15);
+      --hero-bg: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168, 85, 247, 0.15), transparent),
+                 radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59, 130, 246, 0.08), transparent),
+                 radial-gradient(ellipse 60% 40% at 20% 80%, rgba(236, 72, 153, 0.08), transparent);
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; font-size: 16px; line-height: 1.6; color: var(--fg); background: var(--bg); transition: background .2s, color .2s; }
-    mark { background: var(--mark-bg); color: var(--mark-fg); border-radius: 2px; padding: 0 2px; }
 
-    /* ── Layout ── */
-    .doc-layout { display: grid; grid-template-columns: 220px minmax(0,1fr) 200px; min-height: 100vh; }
+    [data-theme="light"] {
+      --bg-primary: #fafafe;
+      --bg-secondary: #f0f0f8;
+      --bg-card: #ffffff;
+      --bg-card-hover: #f8f8ff;
+      --bg-code: #1e1e2e;
+      --bg-glass: rgba(255, 255, 255, 0.7);
+      --text-primary: #1a1a2e;
+      --text-secondary: #4a4a6a;
+      --text-muted: #8888a0;
+      --border-color: rgba(0, 0, 0, 0.08);
+      --border-hover: rgba(0, 0, 0, 0.15);
+      --code-fg: #d4d4dc;
+      --code-keyword: #c084fc;
+      --code-string: #34d399;
+      --code-comment: #6b7280;
+      --code-type: #60a5fa;
+      --code-fn: #f9a8d4;
+      --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.06);
+      --shadow-glow: 0 0 40px rgba(168, 85, 247, 0.08);
+      --hero-bg: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(168, 85, 247, 0.08), transparent),
+                 radial-gradient(ellipse 60% 40% at 80% 60%, rgba(59, 130, 246, 0.05), transparent),
+                 radial-gradient(ellipse 60% 40% at 20% 80%, rgba(236, 72, 153, 0.05), transparent);
+    }
 
-    /* ── Nav ── */
-    .doc-nav { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-right: 1px solid var(--border); background: var(--surface); padding: 24px 0 16px; display: flex; flex-direction: column; }
-    .nav-head { padding: 0 20px; margin-bottom: 16px; }
-    .nav-head h2 { font-size: 14px; font-weight: 600; color: var(--fg); }
-    .nav-head span { font-size: 12px; color: var(--meta); }
-    .nav-toolbar { display: flex; gap: 6px; padding: 0 16px; margin-bottom: 12px; }
-    .nav-toolbar button { width: 32px; height: 32px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; color: var(--muted); font-size: 14px; display: flex; align-items: center; justify-content: center; transition: border-color .15s, color .15s; }
-    .nav-toolbar button:hover { border-color: var(--accent); color: var(--accent); }
-    .nav-toolbar button.active { border-color: var(--accent); color: var(--accent); background: color-mix(in oklab, var(--accent), transparent 92%); }
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--text-primary);
+      background: var(--bg-primary);
+      transition: background var(--transition-speed), color var(--transition-speed);
+      overflow-x: hidden;
+    }
+    a { color: inherit; text-decoration: none; }
+    button { border: none; background: none; cursor: pointer; font-family: inherit; color: inherit; }
 
-    .search-box { padding: 0 16px; margin-bottom: 12px; }
-    .search-box input { width: 100%; padding: 8px 12px; border: 1px solid var(--search-border); border-radius: 8px; background: var(--search-bg); color: var(--fg); font-size: 13px; outline: none; transition: border-color .15s; }
-    .search-box input:focus { border-color: var(--accent); }
-    .search-box input::placeholder { color: var(--meta); }
-    .search-results { display: none; padding: 0 16px; margin-bottom: 8px; font-size: 12px; color: var(--meta); }
-    .search-results.show { display: block; }
+    /* ── Utility ── */
+    .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+    .gradient-text {
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
 
-    .nav-scroll { flex: 1; overflow-y: auto; }
-    .nav-group { font-size: 11px; font-weight: 600; color: var(--meta); text-transform: uppercase; letter-spacing: .06em; padding: 16px 20px 8px; }
-    .nav-link { display: block; padding: 6px 20px; font-size: 14px; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; transition: color .15s, border-color .15s; }
-    .nav-link:hover { color: var(--fg); }
-    .nav-link.active { color: var(--accent); border-left-color: var(--accent); font-weight: 500; }
-    .nav-link.search-hidden { display: none; }
+    /* ── Scroll Animations ── */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.7s ease-out, transform 0.7s ease-out;
+    }
+    .fade-in.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
 
-    /* ── Article ── */
-    .doc-article { padding: 48px 32px; max-width: 780px; margin: 0 auto; }
-    .doc-article h1 { font-size: 32px; font-weight: 700; line-height: 1.25; letter-spacing: -.02em; margin-bottom: 16px; }
-    .doc-article h2 { font-size: 24px; font-weight: 600; line-height: 1.25; margin-top: 48px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border-soft); }
-    .doc-article h3 { font-size: 20px; font-weight: 600; color: var(--fg-2); margin-top: 32px; margin-bottom: 12px; }
-    .doc-article p { color: var(--fg-2); margin-bottom: 16px; }
-    .doc-article ul, .doc-article ol { margin-bottom: 16px; padding-left: 24px; color: var(--fg-2); }
-    .doc-article li { margin-bottom: 8px; }
-    .doc-article a { color: var(--accent); text-decoration: none; }
-    .doc-article a:hover { text-decoration: underline; }
-    .doc-article section.search-hidden { display: none; }
-    .badge { display: inline-block; font-size: 12px; font-weight: 500; padding: 2px 8px; border-radius: 9999px; background: color-mix(in oklab, var(--accent), transparent 88%); color: var(--accent); vertical-align: middle; margin-left: 8px; }
-    code { font-family: ui-monospace, "JetBrains Mono", "Fira Code", monospace; font-size: .875em; background: var(--border-soft); padding: 2px 6px; border-radius: 4px; color: var(--fg); }
-    pre { background: var(--code-bg); color: var(--code-fg); border-radius: 8px; padding: 20px; overflow-x: auto; margin-bottom: 24px; font-size: 14px; line-height: 1.55; }
-    pre code { background: none; padding: 0; border-radius: 0; color: inherit; }
-    .kw { color: #c586c0; } .tp { color: #4ec9b0; } .str { color: #ce9178; } .cm { color: #6a9955; } .fn { color: #dcdcaa; } .nr { color: #b5cea8; }
-    .api-table { width: 100%; border-collapse: collapse; margin-bottom: 24px; font-size: 14px; }
-    .api-table th { text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--meta); padding: 12px 16px; border-bottom: 2px solid var(--border); }
-    .api-table td { padding: 12px 16px; border-bottom: 1px solid var(--border-soft); color: var(--fg-2); vertical-align: top; }
-    .api-table td:first-child { font-weight: 500; color: var(--fg); white-space: nowrap; }
-    .api-table td code { font-size: .85em; }
+    /* ── Header ── */
+    .header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 16px 0;
+      background: var(--bg-glass);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border-color);
+      transition: background var(--transition-speed), border-color var(--transition-speed);
+    }
+    .header .container {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .header-logo {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+    }
+    .header-logo h1 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header-tagline {
+      font-size: 13px;
+      color: var(--text-muted);
+      display: none;
+    }
+    @media (min-width: 640px) {
+      .header-tagline { display: inline; }
+    }
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toggle-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all var(--transition-speed);
+    }
+    .toggle-btn:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+    }
+    .lang-btn {
+      padding: 6px 14px;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all var(--transition-speed);
+    }
+    .lang-btn:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+    }
 
-    /* ── TOC ── */
-    .doc-toc { position: sticky; top: 0; height: 100vh; overflow-y: auto; border-left: 1px solid var(--border); padding: 48px 20px 24px; background: var(--bg); }
-    .toc-title { font-size: 11px; font-weight: 600; color: var(--meta); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px; }
-    .toc-link { display: block; padding: 4px 0; font-size: 14px; color: var(--muted); text-decoration: none; transition: color .15s; }
-    .toc-link:hover { color: var(--fg); }
-    .toc-link.d3 { padding-left: 16px; font-size: 12px; }
+    /* ── Hero ── */
+    .hero {
+      padding: 160px 0 100px;
+      text-align: center;
+      position: relative;
+      background: var(--hero-bg);
+    }
+    .hero::before {
+      content: "";
+      position: absolute;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(168, 85, 247, 0.12), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; transform: translateX(-50%) scale(1); }
+      50% { opacity: 1; transform: translateX(-50%) scale(1.1); }
+    }
+    .hero h2 {
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 800;
+      letter-spacing: -1.5px;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      position: relative;
+    }
+    .hero-subtitle {
+      font-size: clamp(16px, 2.5vw, 20px);
+      color: var(--text-secondary);
+      max-width: 640px;
+      margin: 0 auto 40px;
+      line-height: 1.7;
+      position: relative;
+    }
+    .hero-techs {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      position: relative;
+    }
+    .tech-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      transition: all var(--transition-speed);
+    }
+    .tech-badge:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+      transform: translateY(-2px);
+    }
+
+    /* ── Section shared ── */
+    .section {
+      padding: 100px 0;
+    }
+    .section-header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+    .section-header h3 {
+      font-size: clamp(28px, 4vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 16px;
+    }
+    .section-header p {
+      font-size: 17px;
+      color: var(--text-secondary);
+      max-width: 560px;
+      margin: 0 auto;
+    }
+
+    /* ── Features ── */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+    }
+    .feature-card {
+      padding: 36px 32px;
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      transition: all var(--transition-speed);
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--gradient-accent);
+      opacity: 0;
+      transition: opacity var(--transition-speed);
+    }
+    .feature-card:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-card);
+      transform: translateY(-4px);
+    }
+    .feature-card:hover::before {
+      opacity: 1;
+    }
+    .feature-icon {
+      font-size: 36px;
+      margin-bottom: 20px;
+      display: block;
+    }
+    .feature-card h4 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+    .feature-card p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    /* ── Plugin Showcase ── */
+    .plugins-section {
+      background: var(--bg-secondary);
+    }
+    .plugins-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 24px;
+    }
+    @media (max-width: 420px) {
+      .plugins-grid { grid-template-columns: 1fr; }
+    }
+    .plugin-card {
+      border-radius: var(--radius);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      overflow: hidden;
+      transition: all 0.4s ease;
+      position: relative;
+    }
+    .plugin-card::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      border-radius: var(--radius);
+      padding: 1px;
+      background: var(--gradient-accent);
+      -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+    .plugin-card:hover {
+      transform: translateY(-6px);
+      box-shadow: var(--shadow-card), var(--shadow-glow);
+    }
+    .plugin-card:hover::before {
+      opacity: 1;
+    }
+    .plugin-preview {
+      height: 180px;
+      position: relative;
+      overflow: hidden;
+    }
+    .plugin-preview-bg {
+      position: absolute;
+      inset: 0;
+      transition: transform 0.6s ease;
+    }
+    .plugin-card:hover .plugin-preview-bg {
+      transform: scale(1.08);
+    }
+    /* Individual plugin gradients */
+    .plugin-preview-bg.spectrum {
+      background: linear-gradient(135deg, #1a0533, #2d1b69, #1a0533);
+    }
+    .plugin-preview-bg.spectrum::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      background:
+        linear-gradient(0deg,
+          transparent 0%,
+          rgba(168, 85, 247, 0.5) 10%, transparent 12%,
+          transparent 14%, rgba(168, 85, 247, 0.7) 16%, transparent 18%,
+          transparent 22%, rgba(139, 92, 246, 0.8) 26%, transparent 28%,
+          transparent 32%, rgba(99, 102, 241, 0.6) 38%, transparent 40%,
+          transparent 44%, rgba(59, 130, 246, 0.9) 52%, transparent 54%,
+          transparent 58%, rgba(139, 92, 246, 0.5) 64%, transparent 66%,
+          transparent 70%, rgba(168, 85, 247, 0.7) 78%, transparent 80%,
+          transparent 84%, rgba(236, 72, 153, 0.6) 88%, transparent 90%,
+          transparent 94%, rgba(168, 85, 247, 0.4) 98%, transparent 100%
+        );
+      animation: spectrum-dance 2s ease-in-out infinite alternate;
+    }
+    @keyframes spectrum-dance {
+      0% { transform: scaleY(0.8) translateY(10%); }
+      100% { transform: scaleY(1.1) translateY(-5%); }
+    }
+
+    .plugin-preview-bg.particles {
+      background: radial-gradient(circle at 30% 40%, #ec4899, transparent 50%),
+                  radial-gradient(circle at 70% 60%, #f97316, transparent 50%),
+                  radial-gradient(circle at 50% 50%, #1a0533, #0a0a0a);
+    }
+    .plugin-preview-bg.particles::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,0.8), transparent),
+        radial-gradient(1px 1px at 40% 70%, rgba(255,255,255,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 60% 20%, rgba(236,72,153,0.9), transparent),
+        radial-gradient(1px 1px at 80% 50%, rgba(255,255,255,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 10% 80%, rgba(249,115,22,0.8), transparent),
+        radial-gradient(1px 1px at 90% 10%, rgba(255,255,255,0.5), transparent),
+        radial-gradient(1px 1px at 50% 90%, rgba(236,72,153,0.7), transparent),
+        radial-gradient(1.5px 1.5px at 30% 50%, rgba(255,255,255,0.9), transparent);
+      animation: particle-float 3s ease-in-out infinite alternate;
+    }
+    @keyframes particle-float {
+      0% { transform: translateY(0) rotate(0deg); }
+      100% { transform: translateY(-8px) rotate(1deg); }
+    }
+
+    .plugin-preview-bg.geometry {
+      background: linear-gradient(135deg, #0f172a, #1e1b4b);
+    }
+    .plugin-preview-bg.geometry::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(99,102,241,0.3) 60deg, transparent 120deg,
+                        rgba(168,85,247,0.2) 180deg, transparent 240deg, rgba(59,130,246,0.3) 300deg, transparent 360deg);
+      animation: geometry-spin 8s linear infinite;
+    }
+    @keyframes geometry-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .plugin-preview-bg.starfield {
+      background: radial-gradient(ellipse at center, #1a1a3e, #050510);
+    }
+    .plugin-preview-bg.starfield::after {
+      content: "";
+      position: absolute;
+      inset: -50%;
+      background-image:
+        radial-gradient(1px 1px at 10% 20%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 25% 55%, rgba(147,197,253,0.9), transparent),
+        radial-gradient(1px 1px at 40% 15%, #fff, transparent),
+        radial-gradient(1px 1px at 55% 75%, rgba(196,181,253,0.8), transparent),
+        radial-gradient(2px 2px at 70% 35%, rgba(147,197,253,0.9), transparent),
+        radial-gradient(1px 1px at 85% 60%, #fff, transparent),
+        radial-gradient(1.5px 1.5px at 15% 85%, rgba(196,181,253,0.7), transparent),
+        radial-gradient(1px 1px at 95% 20%, #fff, transparent),
+        radial-gradient(1px 1px at 35% 45%, rgba(147,197,253,0.6), transparent),
+        radial-gradient(1.5px 1.5px at 60% 90%, #fff, transparent),
+        radial-gradient(1px 1px at 75% 10%, rgba(196,181,253,0.8), transparent),
+        radial-gradient(1px 1px at 50% 50%, #fff, transparent);
+      animation: starfield-zoom 4s linear infinite;
+    }
+    @keyframes starfield-zoom {
+      0% { transform: scale(1) rotate(0deg); opacity: 1; }
+      100% { transform: scale(1.5) rotate(2deg); opacity: 0.6; }
+    }
+
+    .plugin-preview-bg.fluid {
+      background: linear-gradient(135deg, #0c1445, #1a0533);
+    }
+    .plugin-preview-bg.fluid::after {
+      content: "";
+      position: absolute;
+      inset: -20%;
+      background:
+        radial-gradient(ellipse 40% 60% at 30% 40%, rgba(59,130,246,0.4), transparent),
+        radial-gradient(ellipse 50% 40% at 70% 60%, rgba(168,85,247,0.4), transparent),
+        radial-gradient(ellipse 60% 50% at 50% 80%, rgba(236,72,153,0.3), transparent);
+      animation: fluid-morph 6s ease-in-out infinite;
+      filter: blur(20px);
+    }
+    @keyframes fluid-morph {
+      0%, 100% { transform: translate(0, 0) rotate(0deg); }
+      33% { transform: translate(10px, -10px) rotate(2deg); }
+      66% { transform: translate(-10px, 5px) rotate(-1deg); }
+    }
+
+    .plugin-preview-bg.ripple {
+      background: radial-gradient(circle at center, #0f172a, #030712);
+    }
+    .plugin-preview-bg.ripple::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 200px;
+      height: 200px;
+      transform: translate(-50%, -50%);
+      border-radius: 50%;
+      background: transparent;
+      box-shadow:
+        0 0 0 10px rgba(59,130,246,0.15),
+        0 0 0 30px rgba(99,102,241,0.1),
+        0 0 0 55px rgba(139,92,246,0.08),
+        0 0 0 85px rgba(168,85,247,0.05),
+        0 0 0 120px rgba(236,72,153,0.03);
+      animation: ripple-expand 3s ease-in-out infinite;
+    }
+    @keyframes ripple-expand {
+      0% { transform: translate(-50%, -50%) scale(0.6); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1.3); opacity: 0.3; }
+    }
+
+    .plugin-info {
+      padding: 20px 24px 24px;
+    }
+    .plugin-info h4 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .plugin-desc {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 16px;
+      line-height: 1.6;
+    }
+    .plugin-meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .plugin-author {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .install-btn {
+      padding: 8px 24px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #fff;
+      background: var(--gradient-accent);
+      background-size: 200% 200%;
+      transition: all var(--transition-speed);
+      position: relative;
+      overflow: hidden;
+    }
+    .install-btn:hover {
+      box-shadow: 0 4px 20px var(--glow-purple);
+      transform: translateY(-1px);
+      background-position: 100% 100%;
+    }
+    .install-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ── Developer Section ── */
+    .dev-section {
+      background: var(--bg-primary);
+    }
+    .code-window {
+      max-width: 740px;
+      margin: 0 auto;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: var(--bg-code);
+      border: 1px solid var(--border-color);
+      box-shadow: var(--shadow-card);
+    }
+    .code-titlebar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 14px 20px;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+    }
+    .code-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+    .code-dot.red { background: #ff5f57; }
+    .code-dot.yellow { background: #febc2e; }
+    .code-dot.green { background: #28c840; }
+    .code-filename {
+      margin-left: 12px;
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .code-body {
+      padding: 24px;
+      overflow-x: auto;
+    }
+    .code-body pre {
+      font-family: var(--font-mono);
+      font-size: 14px;
+      line-height: 1.75;
+      color: var(--code-fg);
+      white-space: pre;
+      tab-size: 2;
+    }
+    .code-body .kw { color: var(--code-keyword); }
+    .code-body .str { color: var(--code-string); }
+    .code-body .cmt { color: var(--code-comment); font-style: italic; }
+    .code-body .tp { color: var(--code-type); }
+    .code-body .fn { color: var(--code-fn); }
+
+    /* ── Architecture ── */
+    .arch-section {
+      background: var(--bg-secondary);
+    }
+    .arch-diagram {
+      max-width: 800px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+    }
+    .arch-node {
+      padding: 18px 36px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      font-size: 16px;
+      font-weight: 600;
+      text-align: center;
+      transition: all var(--transition-speed);
+      position: relative;
+      min-width: 220px;
+    }
+    .arch-node:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+      transform: scale(1.03);
+    }
+    .arch-node.primary {
+      background: var(--gradient-accent);
+      color: #fff;
+      border: none;
+      font-size: 18px;
+    }
+    .arch-node.sdk {
+      border-color: rgba(168, 85, 247, 0.3);
+    }
+    .arch-arrow {
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--text-muted), transparent);
+      position: relative;
+    }
+    .arch-arrow::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--text-muted);
+    }
+    .arch-plugins {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .arch-plugin {
+      padding: 14px 28px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      font-size: 14px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      transition: all var(--transition-speed);
+    }
+    .arch-plugin:hover {
+      border-color: var(--border-hover);
+      box-shadow: var(--shadow-glow);
+      transform: translateY(-2px);
+    }
+    .arch-fan {
+      display: flex;
+      align-items: flex-start;
+      gap: 0;
+      justify-content: center;
+    }
+    .arch-fan-line {
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(to bottom, var(--text-muted), transparent);
+      position: relative;
+    }
+    .arch-fan-line::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--text-muted);
+    }
+    .arch-connector {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      position: relative;
+      width: 100%;
+      max-width: 500px;
+      height: 40px;
+    }
+    .arch-connector::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 2px;
+      height: 20px;
+      background: var(--text-muted);
+    }
+    .arch-connector::after {
+      content: "";
+      position: absolute;
+      top: 20px;
+      left: calc(50% - 200px);
+      width: 400px;
+      height: 2px;
+      background: var(--text-muted);
+    }
+    .arch-branch-lines {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      max-width: 500px;
+    }
+    .arch-branch-line {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+    }
+    .arch-branch-line > div {
+      width: 2px;
+      height: 30px;
+      background: linear-gradient(to bottom, var(--text-muted), transparent);
+      position: relative;
+    }
+    .arch-branch-line > div::after {
+      content: "";
+      position: absolute;
+      bottom: -4px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 5px solid transparent;
+      border-right: 5px solid transparent;
+      border-top: 7px solid var(--text-muted);
+    }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 60px 0 40px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+    .footer-link {
+      font-size: 14px;
+      color: var(--text-secondary);
+      transition: color var(--transition-speed);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .footer-link:hover {
+      color: var(--text-primary);
+    }
+    .footer-link svg {
+      width: 18px;
+      height: 18px;
+      fill: currentColor;
+    }
+    .footer-powered {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .footer-powered span {
+      background: var(--gradient-accent);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 600;
+    }
 
     /* ── Responsive ── */
-    @media (max-width: 1023px) {
-      .doc-layout { grid-template-columns: 1fr; }
-      .doc-nav { position: fixed; left: -280px; width: 280px; z-index: 100; transition: left .2s cubic-bezier(.2,0,0,1); box-shadow: 2px 0 12px rgba(0,0,0,.08); }
-      .doc-nav.open { left: 0; }
-      .doc-toc { display: none; }
-      .doc-article { padding: 32px 16px; }
-      .menu-btn { display: flex; }
+    @media (max-width: 768px) {
+      .hero { padding: 140px 0 80px; }
+      .section { padding: 70px 0; }
+      .features-grid { grid-template-columns: 1fr; }
+      .plugins-grid { grid-template-columns: 1fr; }
+      .arch-connector::after { width: 260px; left: calc(50% - 130px); }
+      .code-body pre { font-size: 12px; }
+      .code-body { padding: 16px; }
     }
-    @media (min-width: 1024px) { .menu-btn { display: none; } .overlay { display: none !important; } }
-    .menu-btn { position: fixed; top: 16px; left: 16px; z-index: 101; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; align-items: center; justify-content: center; color: var(--fg); font-size: 18px; }
-    .overlay { position: fixed; inset: 0; z-index: 99; background: rgba(0,0,0,.3); display: none; }
-    .overlay.show { display: block; }
   </style>
 </head>
 <body>
-
-<button class="menu-btn" onclick="toggleNav()" aria-label="Menu">&#9776;</button>
-<div class="overlay" id="ov" onclick="toggleNav()"></div>
-
-<div class="doc-layout">
-
-  <nav class="doc-nav" id="nav">
-    <div class="nav-head"><h2>DancingStoreSdk</h2><span>v1.0.0</span></div>
-    <div class="nav-toolbar">
-      <button onclick="toggleTheme()" id="themeBtn" title="Toggle dark mode">&#9790;</button>
-      <button onclick="toggleLang()" id="langBtn" title="Switch language">EN</button>
+  <!-- ── Header ── -->
+  <header class="header">
+    <div class="container">
+      <div class="header-logo">
+        <h1 class="gradient-text">DancingStore</h1>
+        <span class="header-tagline" data-i18n="tagline">DancingMusic 舞蹈可视化商店</span>
+      </div>
+      <div class="header-actions">
+        <button class="lang-btn" id="langToggle" aria-label="Toggle language">EN</button>
+        <button class="toggle-btn" id="themeToggle" aria-label="Toggle theme">
+          <span id="themeIcon">&#9789;</span>
+        </button>
+      </div>
     </div>
-    <div class="search-box"><input type="text" id="searchInput" placeholder="Search docs..." data-i18n-placeholder="search_placeholder" /></div>
-    <div class="search-results" id="searchResults"></div>
-    <div class="nav-scroll">
-      <div class="nav-group" data-i18n="nav_guide">Guide</div>
-      <a class="nav-link active" href="#getting-started" data-section="getting-started" data-i18n="nav_getting_started">Getting Started</a>
-      <a class="nav-link" href="#configuration" data-section="configuration" data-i18n="nav_configuration">Configuration</a>
-      <div class="nav-group" data-i18n="nav_api">API Reference</div>
-      <a class="nav-link" href="#store-client" data-section="store-client">DancingStoreClient</a>
-      <a class="nav-link" href="#store-item" data-section="store-item">StoreItem</a>
-      <a class="nav-link" href="#store-order" data-section="store-order">StoreOrder</a>
-      <a class="nav-link" href="#store-list-query" data-section="store-list-query">StoreListQuery</a>
-      <div class="nav-group" data-i18n="nav_links">Links</div>
-      <a class="nav-link" href="https://github.com/DancingMusic/DancingStoreSdk" target="_blank">GitHub &#8599;</a>
-      <a class="nav-link" href="https://dancingmusic.github.io" target="_blank">DancingMusic &#8599;</a>
+  </header>
+
+  <!-- ── Hero ── -->
+  <section class="hero">
+    <div class="container fade-in">
+      <h2>
+        <span class="gradient-text" data-i18n="heroTitle">释放音乐的视觉力量</span>
+      </h2>
+      <p class="hero-subtitle" data-i18n="heroSubtitle">
+        探索、安装和管理舞蹈可视化插件。为 DancingMusic 打造惊艳的实时音频可视化体验。
+      </p>
+      <div class="hero-techs">
+        <span class="tech-badge">WebGL</span>
+        <span class="tech-badge">Canvas 2D</span>
+        <span class="tech-badge">Three.js</span>
+        <span class="tech-badge">Web Audio API</span>
+      </div>
     </div>
-  </nav>
+  </section>
 
-  <main class="doc-article" id="article">
+  <!-- ── Features ── -->
+  <section class="section" id="features">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h3 data-i18n="featuresTitle">为什么选择 DancingStore</h3>
+        <p data-i18n="featuresSubtitle">一站式舞蹈可视化插件平台，为创作者和开发者而生</p>
+      </div>
+      <div class="features-grid">
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#127912;</span>
+          <h4 data-i18n="feat1Title">丰富效果</h4>
+          <p data-i18n="feat1Desc">频谱波形、粒子系统、3D 几何体等多种可视化效果，让每首歌曲都拥有独特的视觉表达。</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#9889;</span>
+          <h4 data-i18n="feat2Title">实时响应</h4>
+          <p data-i18n="feat2Desc">基于音频分析的实时节拍检测与频段响应，毫秒级同步音画联动，带来沉浸式体验。</p>
+        </div>
+        <div class="feature-card fade-in">
+          <span class="feature-icon">&#128295;</span>
+          <h4 data-i18n="feat3Title">开发者友好</h4>
+          <p data-i18n="feat3Desc">使用 @musicdance/plugin-sdk 快速构建自定义可视化插件，完善的类型定义与文档支持。</p>
+        </div>
+      </div>
+    </div>
+  </section>
 
-    <section id="getting-started" data-search-keywords="install getting started quick start dance store client">
-      <h1 data-i18n="h_getting_started">Getting Started</h1>
-      <p data-i18n="p_intro">DancingStoreSdk provides the API client, data models, and type definitions for the Dance store &mdash; covering item listing, purchasing, and order verification.</p>
-      <h3 data-i18n="h_install">Install</h3>
-<pre><code><span class="fn">npm</span> install @dancingmusic/dancing-store-sdk</code></pre>
-      <h3 data-i18n="h_quick_start">Quick start</h3>
-<pre><code><span class="kw">import</span> { <span class="tp">DancingStoreClient</span> } <span class="kw">from</span> <span class="str">'@dancingmusic/dancing-store-sdk'</span>;
+  <!-- ── Plugin Showcase ── -->
+  <section class="section plugins-section" id="plugins">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h3 data-i18n="pluginsTitle">精选插件</h3>
+        <p data-i18n="pluginsSubtitle">发现社区创建的优秀可视化效果</p>
+      </div>
+      <div class="plugins-grid">
 
-<span class="kw">const</span> client = <span class="kw">new</span> <span class="tp">DancingStoreClient</span>({
-  baseUrl: <span class="str">'https://api.dancingmusic.dev/store'</span>,
-  token: <span class="str">'your-auth-token'</span>,
-});
+        <div class="plugin-card fade-in">
+          <div class="plugin-preview">
+            <div class="plugin-preview-bg spectrum"></div>
+          </div>
+          <div class="plugin-info">
+            <h4 data-i18n="p1Name">频谱波形</h4>
+            <p class="plugin-desc" data-i18n="p1Desc">经典频谱分析可视化，将音频频率数据转化为动态柱状波形，支持多种颜色映射模式。</p>
+            <div class="plugin-meta">
+              <span class="plugin-author">by DancingTeam</span>
+              <button class="install-btn" data-i18n="installBtn">安装</button>
+            </div>
+          </div>
+        </div>
 
-<span class="cm">// List all dance items</span>
-<span class="kw">const</span> items = <span class="kw">await</span> client.<span class="fn">list</span>({ category: <span class="str">'abstract'</span> });
+        <div class="plugin-card fade-in">
+          <div class="plugin-preview">
+            <div class="plugin-preview-bg particles"></div>
+          </div>
+          <div class="plugin-info">
+            <h4 data-i18n="p2Name">粒子爆发</h4>
+            <p class="plugin-desc" data-i18n="p2Desc">基于节拍检测的粒子发射系统，每次节拍触发绚丽的粒子爆发效果，支持自定义粒子形态。</p>
+            <div class="plugin-meta">
+              <span class="plugin-author">by VisuaLab</span>
+              <button class="install-btn" data-i18n="installBtn">安装</button>
+            </div>
+          </div>
+        </div>
 
-<span class="cm">// Purchase an item</span>
-<span class="kw">const</span> order = <span class="kw">await</span> client.<span class="fn">createOrder</span>(items[<span class="nr">0</span>].id);</code></pre>
-    </section>
+        <div class="plugin-card fade-in">
+          <div class="plugin-preview">
+            <div class="plugin-preview-bg geometry"></div>
+          </div>
+          <div class="plugin-info">
+            <h4 data-i18n="p3Name">几何旋转</h4>
+            <p class="plugin-desc" data-i18n="p3Desc">Three.js 驱动的 3D 几何体场景，随音乐节奏旋转变换，呈现未来感十足的视觉效果。</p>
+            <div class="plugin-meta">
+              <span class="plugin-author">by GeomX</span>
+              <button class="install-btn" data-i18n="installBtn">安装</button>
+            </div>
+          </div>
+        </div>
 
-    <section id="configuration" data-search-keywords="configuration options baseUrl token timeout StoreClientOptions">
-      <h2 data-i18n="h_configuration">Configuration</h2>
-      <p data-i18n="p_config">The client accepts a <code>StoreClientOptions</code> object:</p>
-      <table class="api-table"><thead><tr><th data-i18n="th_option">Option</th><th data-i18n="th_type">Type</th><th data-i18n="th_desc">Description</th></tr></thead><tbody>
-        <tr><td><code>baseUrl</code></td><td><code>string</code></td><td data-i18n="td_cfg_base_url">Store API base URL (trailing slash is trimmed)</td></tr>
-        <tr><td><code>token</code></td><td><code>string</code></td><td><span data-i18n="td_cfg_token">Auth token for authenticated endpoints</span> <span class="badge">optional</span></td></tr>
-        <tr><td><code>timeoutMs</code></td><td><code>number</code></td><td><span data-i18n="td_cfg_timeout">Request timeout in milliseconds</span> <span class="badge">optional</span></td></tr>
-      </tbody></table>
-      <p data-i18n="p_config_access">Access the resolved config via the read-only <code>client.config</code> property.</p>
-    </section>
+        <div class="plugin-card fade-in">
+          <div class="plugin-preview">
+            <div class="plugin-preview-bg starfield"></div>
+          </div>
+          <div class="plugin-info">
+            <h4 data-i18n="p4Name">星空隧道</h4>
+            <p class="plugin-desc" data-i18n="p4Desc">穿越星空的隧道效果，低频驱动前进速度，高频控制星星密度，打造宇宙漫游般的沉浸感。</p>
+            <div class="plugin-meta">
+              <span class="plugin-author">by CosmicDev</span>
+              <button class="install-btn" data-i18n="installBtn">安装</button>
+            </div>
+          </div>
+        </div>
 
-    <section id="store-client" data-search-keywords="DancingStoreClient list get createOrder verifyOrder error handling">
-      <h2>DancingStoreClient</h2>
-      <p data-i18n="p_store_client">The main API client class for interacting with the dance store.</p>
-      <table class="api-table"><thead><tr><th data-i18n="th_method">Method</th><th data-i18n="th_signature">Signature</th><th data-i18n="th_desc">Description</th></tr></thead><tbody>
-        <tr><td><code>list</code></td><td><code>(query?: StoreListQuery) =&gt; Promise&lt;StoreItem[]&gt;</code></td><td data-i18n="td_sc_list">List store items with optional filters</td></tr>
-        <tr><td><code>get</code></td><td><code>(itemId: string) =&gt; Promise&lt;StoreItem | null&gt;</code></td><td data-i18n="td_sc_get">Get a single item by ID</td></tr>
-        <tr><td><code>createOrder</code></td><td><code>(itemId: string) =&gt; Promise&lt;StoreOrder&gt;</code></td><td data-i18n="td_sc_create">Create a purchase order</td></tr>
-        <tr><td><code>verifyOrder</code></td><td><code>(orderId: string) =&gt; Promise&lt;StoreOrder | null&gt;</code></td><td data-i18n="td_sc_verify">Verify order payment status</td></tr>
-        <tr><td><code>config</code></td><td><code>{ baseUrl, hasToken }</code></td><td data-i18n="td_sc_config">Read-only resolved configuration</td></tr>
-      </tbody></table>
-      <h3 data-i18n="h_error_handling">Error handling</h3>
-      <p data-i18n="p_error_handling">Methods throw a standard <code>Error</code> when required parameters are missing (e.g. empty <code>itemId</code>). Network errors propagate as-is from the underlying fetch implementation.</p>
-    </section>
+        <div class="plugin-card fade-in">
+          <div class="plugin-preview">
+            <div class="plugin-preview-bg fluid"></div>
+          </div>
+          <div class="plugin-info">
+            <h4 data-i18n="p5Name">流体模拟</h4>
+            <p class="plugin-desc" data-i18n="p5Desc">WebGL 流体动力学模拟，音频能量驱动流体的速度与色彩变化，营造梦幻般的视觉氛围。</p>
+            <div class="plugin-meta">
+              <span class="plugin-author">by FlowStudio</span>
+              <button class="install-btn" data-i18n="installBtn">安装</button>
+            </div>
+          </div>
+        </div>
 
-    <section id="store-item" data-search-keywords="StoreItem id title description price currency version authorId createdAt updatedAt">
-      <h2>StoreItem</h2>
-      <p data-i18n="p_store_item">Represents a dance visualization item in the store.</p>
-      <table class="api-table"><thead><tr><th data-i18n="th_field">Field</th><th data-i18n="th_type">Type</th><th data-i18n="th_desc">Description</th></tr></thead><tbody>
-        <tr><td><code>id</code></td><td><code>string</code></td><td data-i18n="td_si_id">Unique item identifier</td></tr>
-        <tr><td><code>title</code></td><td><code>string</code></td><td data-i18n="td_si_title">Display title</td></tr>
-        <tr><td><code>description</code></td><td><code>string</code></td><td data-i18n="td_si_desc">Item description</td></tr>
-        <tr><td><code>price</code></td><td><code>number</code></td><td data-i18n="td_si_price">Price amount</td></tr>
-        <tr><td><code>currency</code></td><td><code>string</code></td><td data-i18n="td_si_currency">Currency code (e.g. "USD")</td></tr>
-        <tr><td><code>version</code></td><td><code>string</code></td><td data-i18n="td_si_version">Item version</td></tr>
-        <tr><td><code>authorId</code></td><td><code>string</code></td><td data-i18n="td_si_author">Author identifier</td></tr>
-        <tr><td><code>createdAt</code></td><td><code>string</code></td><td data-i18n="td_si_created">ISO creation timestamp</td></tr>
-        <tr><td><code>updatedAt</code></td><td><code>string</code></td><td data-i18n="td_si_updated">ISO update timestamp</td></tr>
-      </tbody></table>
-    </section>
+        <div class="plugin-card fade-in">
+          <div class="plugin-preview">
+            <div class="plugin-preview-bg ripple"></div>
+          </div>
+          <div class="plugin-info">
+            <h4 data-i18n="p6Name">声波涟漪</h4>
+            <p class="plugin-desc" data-i18n="p6Desc">声音化为水面涟漪向外扩散，不同频段对应不同颜色的波纹，创造宁静而富有韵律的画面。</p>
+            <div class="plugin-meta">
+              <span class="plugin-author">by WaveCraft</span>
+              <button class="install-btn" data-i18n="installBtn">安装</button>
+            </div>
+          </div>
+        </div>
 
-    <section id="store-order" data-search-keywords="StoreOrder orderId itemId amount currency status pending paid failed refunded">
-      <h2>StoreOrder</h2>
-      <p data-i18n="p_store_order">Represents a purchase order.</p>
-      <table class="api-table"><thead><tr><th data-i18n="th_field">Field</th><th data-i18n="th_type">Type</th><th data-i18n="th_desc">Description</th></tr></thead><tbody>
-        <tr><td><code>orderId</code></td><td><code>string</code></td><td data-i18n="td_so_id">Unique order identifier</td></tr>
-        <tr><td><code>itemId</code></td><td><code>string</code></td><td data-i18n="td_so_item">Purchased item ID</td></tr>
-        <tr><td><code>amount</code></td><td><code>number</code></td><td data-i18n="td_so_amount">Payment amount</td></tr>
-        <tr><td><code>currency</code></td><td><code>string</code></td><td data-i18n="td_so_currency">Currency code</td></tr>
-        <tr><td><code>status</code></td><td><code>'pending' | 'paid' | 'failed' | 'refunded'</code></td><td data-i18n="td_so_status">Order status</td></tr>
-      </tbody></table>
-    </section>
+      </div>
+    </div>
+  </section>
 
-    <section id="store-list-query" data-search-keywords="StoreListQuery page pageSize keyword category filter pagination">
-      <h2>StoreListQuery</h2>
-      <p data-i18n="p_list_query">Query parameters for the <code>list()</code> method.</p>
-      <table class="api-table"><thead><tr><th data-i18n="th_field">Field</th><th data-i18n="th_type">Type</th><th data-i18n="th_desc">Description</th></tr></thead><tbody>
-        <tr><td><code>page</code></td><td><code>number</code></td><td><span data-i18n="td_lq_page">Page number</span> <span class="badge">optional</span></td></tr>
-        <tr><td><code>pageSize</code></td><td><code>number</code></td><td><span data-i18n="td_lq_size">Items per page</span> <span class="badge">optional</span></td></tr>
-        <tr><td><code>keyword</code></td><td><code>string</code></td><td><span data-i18n="td_lq_keyword">Search keyword</span> <span class="badge">optional</span></td></tr>
-        <tr><td><code>category</code></td><td><code>string</code></td><td><span data-i18n="td_lq_category">Filter by category</span> <span class="badge">optional</span></td></tr>
-      </tbody></table>
-    </section>
+  <!-- ── Developer ── -->
+  <section class="section dev-section" id="developer">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h3 data-i18n="devTitle">构建你的插件</h3>
+        <p data-i18n="devSubtitle">使用 @musicdance/plugin-sdk 快速开发自定义可视化效果</p>
+      </div>
+      <div class="code-window fade-in">
+        <div class="code-titlebar">
+          <span class="code-dot red"></span>
+          <span class="code-dot yellow"></span>
+          <span class="code-dot green"></span>
+          <span class="code-filename">my-plugin.ts</span>
+        </div>
+        <div class="code-body">
+          <pre><span class="kw">import</span> { <span class="tp">DancePlugin</span>, <span class="tp">AudioData</span>, <span class="tp">RenderContext</span> } <span class="kw">from</span> <span class="str">'@musicdance/plugin-sdk'</span>;
 
-  </main>
+<span class="kw">export class</span> <span class="tp">MyVisualizerPlugin</span> <span class="kw">implements</span> <span class="tp">DancePlugin</span> {
+  <span class="fn">name</span> = <span class="str">'my-visualizer'</span>;
+  <span class="fn">version</span> = <span class="str">'1.0.0'</span>;
 
-  <aside class="doc-toc">
-    <div class="toc-title" data-i18n="toc_title">On this page</div>
-    <a class="toc-link" href="#getting-started" data-i18n="nav_getting_started">Getting Started</a>
-    <a class="toc-link" href="#configuration" data-i18n="nav_configuration">Configuration</a>
-    <a class="toc-link" href="#store-client">DancingStoreClient</a>
-    <a class="toc-link d3" href="#store-client" data-i18n="h_error_handling">Error handling</a>
-    <a class="toc-link" href="#store-item">StoreItem</a>
-    <a class="toc-link" href="#store-order">StoreOrder</a>
-    <a class="toc-link" href="#store-list-query">StoreListQuery</a>
-  </aside>
-
-</div>
-
-<script>
-const i18n = {
-  en: {
-    search_placeholder: 'Search docs...',
-    nav_guide: 'Guide', nav_api: 'API Reference', nav_links: 'Links',
-    nav_getting_started: 'Getting Started', nav_configuration: 'Configuration',
-    toc_title: 'On this page',
-    h_getting_started: 'Getting Started', h_install: 'Install', h_quick_start: 'Quick start',
-    p_intro: 'DancingStoreSdk provides the API client, data models, and type definitions for the Dance store &mdash; covering item listing, purchasing, and order verification.',
-    h_configuration: 'Configuration',
-    p_config: 'The client accepts a <code>StoreClientOptions</code> object:',
-    th_option: 'Option', th_type: 'Type', th_desc: 'Description', th_method: 'Method', th_signature: 'Signature', th_field: 'Field',
-    td_cfg_base_url: 'Store API base URL (trailing slash is trimmed)',
-    td_cfg_token: 'Auth token for authenticated endpoints',
-    td_cfg_timeout: 'Request timeout in milliseconds',
-    p_config_access: 'Access the resolved config via the read-only <code>client.config</code> property.',
-    p_store_client: 'The main API client class for interacting with the dance store.',
-    td_sc_list: 'List store items with optional filters',
-    td_sc_get: 'Get a single item by ID',
-    td_sc_create: 'Create a purchase order',
-    td_sc_verify: 'Verify order payment status',
-    td_sc_config: 'Read-only resolved configuration',
-    h_error_handling: 'Error handling',
-    p_error_handling: 'Methods throw a standard <code>Error</code> when required parameters are missing (e.g. empty <code>itemId</code>). Network errors propagate as-is from the underlying fetch implementation.',
-    p_store_item: 'Represents a dance visualization item in the store.',
-    td_si_id: 'Unique item identifier', td_si_title: 'Display title', td_si_desc: 'Item description',
-    td_si_price: 'Price amount', td_si_currency: 'Currency code (e.g. "USD")',
-    td_si_version: 'Item version', td_si_author: 'Author identifier',
-    td_si_created: 'ISO creation timestamp', td_si_updated: 'ISO update timestamp',
-    p_store_order: 'Represents a purchase order.',
-    td_so_id: 'Unique order identifier', td_so_item: 'Purchased item ID',
-    td_so_amount: 'Payment amount', td_so_currency: 'Currency code', td_so_status: 'Order status',
-    p_list_query: 'Query parameters for the <code>list()</code> method.',
-    td_lq_page: 'Page number', td_lq_size: 'Items per page',
-    td_lq_keyword: 'Search keyword', td_lq_category: 'Filter by category',
-    search_no_results: 'No results found',
-    search_results_count: '{n} section(s) found',
-  },
-  zh: {
-    search_placeholder: '搜索文档...',
-    nav_guide: '指南', nav_api: 'API 参考', nav_links: '链接',
-    nav_getting_started: '快速开始', nav_configuration: '配置',
-    toc_title: '本页目录',
-    h_getting_started: '快速开始', h_install: '安装', h_quick_start: '快速上手',
-    p_intro: 'DancingStoreSdk 提供舞蹈商店的 API 客户端、数据模型和类型定义 &mdash; 涵盖商品列表、购买和订单验证。',
-    h_configuration: '配置',
-    p_config: '客户端接受一个 <code>StoreClientOptions</code> 配置对象：',
-    th_option: '选项', th_type: '类型', th_desc: '描述', th_method: '方法', th_signature: '签名', th_field: '字段',
-    td_cfg_base_url: '商店 API 基础 URL（尾部斜杠会自动去除）',
-    td_cfg_token: '用于认证端点的令牌',
-    td_cfg_timeout: '请求超时时间（毫秒）',
-    p_config_access: '通过只读属性 <code>client.config</code> 访问已解析的配置。',
-    p_store_client: '与舞蹈商店交互的主要 API 客户端类。',
-    td_sc_list: '列出商店商品，支持可选过滤条件',
-    td_sc_get: '根据 ID 获取单个商品',
-    td_sc_create: '创建购买订单',
-    td_sc_verify: '验证订单支付状态',
-    td_sc_config: '只读已解析配置',
-    h_error_handling: '错误处理',
-    p_error_handling: '当必填参数缺失时（如空的 <code>itemId</code>），方法会抛出标准 <code>Error</code>。网络错误按原样从底层 fetch 实现传播。',
-    p_store_item: '表示商店中的舞蹈可视化商品。',
-    td_si_id: '唯一商品标识符', td_si_title: '显示标题', td_si_desc: '商品描述',
-    td_si_price: '价格', td_si_currency: '货币代码（如 "USD"）',
-    td_si_version: '商品版本', td_si_author: '作者标识符',
-    td_si_created: 'ISO 创建时间戳', td_si_updated: 'ISO 更新时间戳',
-    p_store_order: '表示一个购买订单。',
-    td_so_id: '唯一订单标识符', td_so_item: '购买的商品 ID',
-    td_so_amount: '支付金额', td_so_currency: '货币代码', td_so_status: '订单状态',
-    p_list_query: '<code>list()</code> 方法的查询参数。',
-    td_lq_page: '页码', td_lq_size: '每页条数',
-    td_lq_keyword: '搜索关键字', td_lq_category: '按分类筛选',
-    search_no_results: '未找到结果',
-    search_results_count: '找到 {n} 个章节',
+  <span class="cmt">// Initialize canvas, WebGL context, etc.</span>
+  <span class="kw">async</span> <span class="fn">init</span>(<span class="fn">ctx</span>: <span class="tp">RenderContext</span>): <span class="tp">Promise</span>&lt;<span class="tp">void</span>&gt; {
+    <span class="kw">this</span>.gl = ctx.canvas.<span class="fn">getContext</span>(<span class="str">'webgl2'</span>);
+    <span class="cmt">// Setup shaders, buffers...</span>
   }
-};
 
-let currentLang = localStorage.getItem('doc-lang') || 'en';
-let currentTheme = localStorage.getItem('doc-theme') || (matchMedia('(prefers-color-scheme:dark)').matches ? 'dark' : 'light');
-
-function applyTheme(t) {
-  currentTheme = t;
-  document.documentElement.setAttribute('data-theme', t);
-  document.getElementById('themeBtn').textContent = t === 'dark' ? '☀' : '☾';
-  localStorage.setItem('doc-theme', t);
-}
-
-function toggleTheme() { applyTheme(currentTheme === 'dark' ? 'light' : 'dark'); }
-
-function applyLang(lang) {
-  currentLang = lang;
-  const dict = i18n[lang] || i18n.en;
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    if (dict[key] != null) el.innerHTML = dict[key];
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    if (dict[key] != null) el.placeholder = dict[key];
-  });
-  document.getElementById('langBtn').textContent = lang === 'zh' ? '中' : 'EN';
-  document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en';
-  localStorage.setItem('doc-lang', lang);
-}
-
-function toggleLang() { applyLang(currentLang === 'zh' ? 'en' : 'zh'); }
-
-// ── Search ──
-const searchInput = document.getElementById('searchInput');
-const searchResults = document.getElementById('searchResults');
-const sections = document.querySelectorAll('.doc-article section[id]');
-const navLinks = document.querySelectorAll('.nav-link[data-section]');
-
-searchInput.addEventListener('input', function() {
-  const q = this.value.trim().toLowerCase();
-  if (!q) {
-    sections.forEach(s => s.classList.remove('search-hidden'));
-    navLinks.forEach(l => l.classList.remove('search-hidden'));
-    searchResults.classList.remove('show');
-    return;
+  <span class="cmt">// Called every frame with real-time audio data</span>
+  <span class="fn">render</span>(<span class="fn">audio</span>: <span class="tp">AudioData</span>, <span class="fn">ctx</span>: <span class="tp">RenderContext</span>): <span class="tp">void</span> {
+    <span class="kw">const</span> { frequency, waveform, bpm, beat } = audio;
+    <span class="cmt">// Your visualization logic here</span>
   }
-  let count = 0;
-  sections.forEach(s => {
-    const text = (s.textContent + ' ' + (s.dataset.searchKeywords || '')).toLowerCase();
-    const match = text.includes(q);
-    s.classList.toggle('search-hidden', !match);
-    if (match) count++;
-  });
-  navLinks.forEach(l => {
-    const sid = l.dataset.section;
-    const sec = document.getElementById(sid);
-    l.classList.toggle('search-hidden', sec ? sec.classList.contains('search-hidden') : false);
-  });
-  const dict = i18n[currentLang] || i18n.en;
-  searchResults.textContent = count ? dict.search_results_count.replace('{n}', count) : dict.search_no_results;
-  searchResults.classList.add('show');
-});
 
-// ── Scroll highlight ──
-const headings = document.querySelectorAll('h1[id], h2[id]');
-const allNavLinks = document.querySelectorAll('.nav-link[href^="#"]');
-const tocLinks = document.querySelectorAll('.toc-link');
-window.addEventListener('scroll', () => {
-  let cur = '';
-  headings.forEach(s => { if (scrollY >= s.offsetTop - 80) cur = s.id || s.closest('section[id]')?.id || ''; });
-  allNavLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + cur));
-  tocLinks.forEach(l => { l.style.color = l.getAttribute('href') === '#' + cur ? 'var(--accent)' : ''; });
-}, { passive: true });
+  <span class="cmt">// Cleanup resources</span>
+  <span class="fn">dispose</span>(): <span class="tp">void</span> {
+    <span class="cmt">// Release GPU resources, cancel animations...</span>
+  }
+}</pre>
+        </div>
+      </div>
+    </div>
+  </section>
 
-function toggleNav() { document.getElementById('nav').classList.toggle('open'); document.getElementById('ov').classList.toggle('show'); }
+  <!-- ── Architecture ── -->
+  <section class="section arch-section" id="architecture">
+    <div class="container">
+      <div class="section-header fade-in">
+        <h3 data-i18n="archTitle">系统架构</h3>
+        <p data-i18n="archSubtitle">模块化设计，插件即插即用</p>
+      </div>
+      <div class="arch-diagram fade-in">
+        <div class="arch-node primary">DancingMusic</div>
+        <div class="arch-arrow"></div>
+        <div class="arch-node">DancingStore</div>
+        <div class="arch-arrow"></div>
+        <div class="arch-node sdk">DancingPluginSdk</div>
+        <div class="arch-connector"></div>
+        <div class="arch-branch-lines" style="max-width:500px;">
+          <div class="arch-branch-line"><div></div></div>
+          <div class="arch-branch-line"><div></div></div>
+          <div class="arch-branch-line"><div></div></div>
+        </div>
+        <div class="arch-plugins">
+          <div class="arch-plugin">Plugin A</div>
+          <div class="arch-plugin">Plugin B</div>
+          <div class="arch-plugin" data-i18n="archCustom">Custom...</div>
+        </div>
+      </div>
+    </div>
+  </section>
 
-// ── Init ──
-applyTheme(currentTheme);
-applyLang(currentLang);
-</script>
+  <!-- ── Footer ── -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-links">
+        <a href="https://github.com/DancingMusic/DancingStore" target="_blank" rel="noopener" class="footer-link">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          DancingStore
+        </a>
+        <a href="https://github.com/DancingMusic/DancingPluginSdk" target="_blank" rel="noopener" class="footer-link">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+          DancingPluginSdk
+        </a>
+      </div>
+      <p class="footer-powered">Powered by <span>DancingMusic</span></p>
+    </div>
+  </footer>
+
+  <script>
+    /* ── i18n ── */
+    const translations = {
+      zh: {
+        tagline: 'DancingMusic 舞蹈可视化商店',
+        heroTitle: '释放音乐的视觉力量',
+        heroSubtitle: '探索、安装和管理舞蹈可视化插件。为 DancingMusic 打造惊艳的实时音频可视化体验。',
+        featuresTitle: '为什么选择 DancingStore',
+        featuresSubtitle: '一站式舞蹈可视化插件平台，为创作者和开发者而生',
+        feat1Title: '丰富效果',
+        feat1Desc: '频谱波形、粒子系统、3D 几何体等多种可视化效果，让每首歌曲都拥有独特的视觉表达。',
+        feat2Title: '实时响应',
+        feat2Desc: '基于音频分析的实时节拍检测与频段响应，毫秒级同步音画联动，带来沉浸式体验。',
+        feat3Title: '开发者友好',
+        feat3Desc: '使用 @musicdance/plugin-sdk 快速构建自定义可视化插件，完善的类型定义与文档支持。',
+        pluginsTitle: '精选插件',
+        pluginsSubtitle: '发现社区创建的优秀可视化效果',
+        p1Name: '频谱波形',
+        p1Desc: '经典频谱分析可视化，将音频频率数据转化为动态柱状波形，支持多种颜色映射模式。',
+        p2Name: '粒子爆发',
+        p2Desc: '基于节拍检测的粒子发射系统，每次节拍触发绚丽的粒子爆发效果，支持自定义粒子形态。',
+        p3Name: '几何旋转',
+        p3Desc: 'Three.js 驱动的 3D 几何体场景，随音乐节奏旋转变换，呈现未来感十足的视觉效果。',
+        p4Name: '星空隧道',
+        p4Desc: '穿越星空的隧道效果，低频驱动前进速度，高频控制星星密度，打造宇宙漫游般的沉浸感。',
+        p5Name: '流体模拟',
+        p5Desc: 'WebGL 流体动力学模拟，音频能量驱动流体的速度与色彩变化，营造梦幻般的视觉氛围。',
+        p6Name: '声波涟漪',
+        p6Desc: '声音化为水面涟漪向外扩散，不同频段对应不同颜色的波纹，创造宁静而富有韵律的画面。',
+        installBtn: '安装',
+        devTitle: '构建你的插件',
+        devSubtitle: '使用 @musicdance/plugin-sdk 快速开发自定义可视化效果',
+        archTitle: '系统架构',
+        archSubtitle: '模块化设计，插件即插即用',
+        archCustom: 'Custom...',
+      },
+      en: {
+        tagline: 'DancingMusic Dance Visualization Store',
+        heroTitle: 'Unleash the Visual Power of Music',
+        heroSubtitle: 'Explore, install, and manage dance visualization plugins. Create stunning real-time audio visualizations for DancingMusic.',
+        featuresTitle: 'Why DancingStore',
+        featuresSubtitle: 'A one-stop dance visualization plugin platform for creators and developers',
+        feat1Title: 'Rich Effects',
+        feat1Desc: 'Spectrum waveforms, particle systems, 3D geometries, and more — give every song a unique visual expression.',
+        feat2Title: 'Real-time Response',
+        feat2Desc: 'Real-time beat detection and frequency-band response based on audio analysis, with millisecond-level synchronization.',
+        feat3Title: 'Developer Friendly',
+        feat3Desc: 'Build custom visualization plugins quickly with @musicdance/plugin-sdk, complete with type definitions and documentation.',
+        pluginsTitle: 'Featured Plugins',
+        pluginsSubtitle: 'Discover outstanding visualizations built by the community',
+        p1Name: 'Spectrum Waveform',
+        p1Desc: 'Classic spectrum analyzer visualization, transforming audio frequency data into dynamic bar waveforms with multiple color mapping modes.',
+        p2Name: 'Particle Burst',
+        p2Desc: 'Beat-driven particle emitter system — each beat triggers a dazzling particle explosion with customizable particle shapes.',
+        p3Name: 'Geometry Spin',
+        p3Desc: 'Three.js-powered 3D geometry scene that rotates and transforms with the beat, delivering a futuristic visual experience.',
+        p4Name: 'Starfield Tunnel',
+        p4Desc: 'A tunnel through the stars — bass drives speed, treble controls star density, creating an immersive cosmic voyage.',
+        p5Name: 'Fluid Simulation',
+        p5Desc: 'WebGL fluid dynamics simulation where audio energy drives velocity and color shifts, creating a dreamlike atmosphere.',
+        p6Name: 'Sonic Ripples',
+        p6Desc: 'Sound transforms into expanding ripples on water, with different frequency bands mapped to different colored waves.',
+        installBtn: 'Install',
+        devTitle: 'Build Your Plugin',
+        devSubtitle: 'Develop custom visualizations quickly with @musicdance/plugin-sdk',
+        archTitle: 'Architecture',
+        archSubtitle: 'Modular design, plug-and-play plugins',
+        archCustom: 'Custom...',
+      }
+    };
+
+    let currentLang = 'zh';
+
+    function setLang(lang) {
+      currentLang = lang;
+      const t = translations[lang];
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (key === 'installBtn') return; // handled separately
+        if (t[key]) el.textContent = t[key];
+      });
+      // Handle all install buttons
+      document.querySelectorAll('[data-i18n="installBtn"]').forEach(el => {
+        el.textContent = t.installBtn;
+      });
+      document.getElementById('langToggle').textContent = lang === 'zh' ? 'EN' : '中文';
+      document.documentElement.lang = lang;
+    }
+
+    document.getElementById('langToggle').addEventListener('click', () => {
+      setLang(currentLang === 'zh' ? 'en' : 'zh');
+    });
+
+    /* ── Theme Toggle ── */
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.getElementById('themeIcon').innerHTML = theme === 'dark' ? '&#9789;' : '&#9788;';
+      localStorage.setItem('ds-theme', theme);
+    }
+
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      setTheme(current === 'dark' ? 'light' : 'dark');
+    });
+
+    // Restore saved theme
+    const savedTheme = localStorage.getItem('ds-theme');
+    if (savedTheme) setTheme(savedTheme);
+
+    /* ── Scroll Animations ── */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry, i) => {
+        if (entry.isIntersecting) {
+          // Stagger children
+          const delay = entry.target.closest('.features-grid, .plugins-grid')
+            ? Array.from(entry.target.parentElement.children).indexOf(entry.target) * 100
+            : 0;
+          setTimeout(() => entry.target.classList.add('visible'), delay);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>
