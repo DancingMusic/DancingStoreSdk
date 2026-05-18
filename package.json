@@ -1,7 +1,7 @@
 {
-  "name": "@dancingmusic/dancing-store-sdk",
-  "version": "0.1.0",
-  "description": "Dancing store domain SDK for DancingMusic",
+  "name": "@dancingmusic/dancing-store",
+  "version": "0.2.0",
+  "description": "Dancing Store for DancingMusic — standalone dance visualization plugin marketplace",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
