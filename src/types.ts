@@ -1,5 +1,6 @@
 export const PLUGIN_MANIFEST_SCHEMA_VERSION = "1" as const;
 export const PLUGIN_REGISTRY_SCHEMA_VERSION = "1" as const;
+export const OFFICIAL_DEFAULTS_SCHEMA_VERSION = "1" as const;
 
 export type PluginCapability =
   | "audio-reactive"
@@ -37,6 +38,12 @@ export interface PluginDistribution {
   url: string;
   format: "esm";
   integrity?: string;
+  mirrors?: PluginDistributionMirror[];
+}
+
+export interface PluginDistributionMirror {
+  region: "global" | "china";
+  url: string;
 }
 
 export interface PluginManifest {
@@ -51,6 +58,8 @@ export interface PluginManifest {
   license: PluginLicense;
   compatibility: PluginCompatibility;
   distribution: PluginDistribution;
+  releaseNotesUrl?: string;
+  publishedAt?: string;
   capabilities: PluginCapability[];
   permissions: PluginPermission[];
   tags: string[];
@@ -63,6 +72,25 @@ export interface PluginRegistryIndex {
   schemaVersion: typeof PLUGIN_REGISTRY_SCHEMA_VERSION;
   generatedAt: string;
   plugins: PluginManifest[];
+}
+
+export interface OfficialDefaultPlugin {
+  id: string;
+  version: string;
+  order: number;
+  installMode: "preinstalled" | "recommended";
+  updatePolicy: "notify";
+}
+
+export interface OfficialDefaultsProfile {
+  $schema?: string;
+  schemaVersion: typeof OFFICIAL_DEFAULTS_SCHEMA_VERSION;
+  id: "official-defaults";
+  channel: "stable" | "beta";
+  revision: string;
+  defaultPluginId: string;
+  plugins: OfficialDefaultPlugin[];
+  updatedAt: string;
 }
 
 export interface PluginRegistryQuery {

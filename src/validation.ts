@@ -6,6 +6,7 @@ import {
   type PluginManifest,
   type PluginPermission,
   type PluginRegistryIndex,
+  type OfficialDefaultsProfile,
 } from "./types";
 
 const capabilities = new Set<PluginCapability>([
@@ -38,7 +39,7 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
     "repository", "license", "compatibility", "distribution", "capabilities", "permissions",
     "tags", "status", "submittedAt", "updatedAt"];
   for (const field of required) if (!(field in value)) issue(`$.${field}`, "is required");
-  const allowed = new Set(["$schema", ...required]);
+  const allowed = new Set(["$schema", ...required, "releaseNotesUrl", "publishedAt"]);
   for (const field of Object.keys(value)) if (!allowed.has(field)) issue(`$.${field}`, "is not allowed");
   if (value.schemaVersion !== "1") issue("$.schemaVersion", 'must equal "1"');
   if (value.$schema !== undefined && typeof value.$schema !== "string") issue("$.$schema", "must be a string");
@@ -49,6 +50,8 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
   if (typeof value.summary === "string" && value.summary.length > 240) issue("$.summary", "must not exceed 240 characters");
   if (typeof value.version !== "string" || !semver.test(value.version)) issue("$.version", "must be SemVer");
   if (!httpsUrl(value.repository)) issue("$.repository", "must be an HTTPS URL");
+  if (value.releaseNotesUrl !== undefined && !httpsUrl(value.releaseNotesUrl)) issue("$.releaseNotesUrl", "must be an HTTPS URL");
+  if (value.publishedAt !== undefined && (typeof value.publishedAt !== "string" || !date.test(value.publishedAt) || Number.isNaN(Date.parse(value.publishedAt)))) issue("$.publishedAt", "must be an ISO 8601 UTC timestamp");
 
   if (!isRecord(value.publisher)) issue("$.publisher", "must be an object");
   else {
@@ -72,7 +75,7 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
   }
   if (!isRecord(value.distribution)) issue("$.distribution", "must be an object");
   else {
-    for (const field of Object.keys(value.distribution)) if (!["url", "format", "integrity"].includes(field)) issue(`$.distribution.${field}`, "is not allowed");
+    for (const field of Object.keys(value.distribution)) if (!["url", "format", "integrity", "mirrors"].includes(field)) issue(`$.distribution.${field}`, "is not allowed");
     if (!httpsUrl(value.distribution.url)) issue("$.distribution.url", "must be an HTTPS URL");
     if (value.distribution.format !== "esm") issue("$.distribution.format", 'must equal "esm"');
     if (typeof value.distribution.url === "string" && /@(main|master|head)(?:\/|$)/i.test(value.distribution.url)) issue("$.distribution.url", "must pin a tag or immutable commit, not a branch");
@@ -80,6 +83,31 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
       !value.distribution.url.includes(value.version) && !/[a-f0-9]{40}/i.test(value.distribution.url)) issue("$.distribution.url", "must contain the manifest version or a full commit hash");
     if (value.distribution.integrity !== undefined &&
       (typeof value.distribution.integrity !== "string" || !/^sha(256|384|512)-[A-Za-z0-9+/]+={0,2}$/.test(value.distribution.integrity))) issue("$.distribution.integrity", "must be an SRI sha256/384/512 value");
+    if (value.distribution.mirrors !== undefined) {
+      if (!Array.isArray(value.distribution.mirrors) || value.distribution.mirrors.length === 0 || value.distribution.mirrors.length > 2) {
+        issue("$.distribution.mirrors", "must contain one or two regional mirrors");
+      } else {
+        const regions = new Set<string>();
+        const urls = new Set<string>();
+        value.distribution.mirrors.forEach((mirror, index) => {
+          const path = `$.distribution.mirrors[${index}]`;
+          if (!isRecord(mirror)) return issue(path, "must be an object");
+          for (const field of Object.keys(mirror)) if (!["region", "url"].includes(field)) issue(`${path}.${field}`, "is not allowed");
+          if (mirror.region !== "global" && mirror.region !== "china") issue(`${path}.region`, "must equal global or china");
+          else if (regions.has(mirror.region)) issue(`${path}.region`, "must not duplicate a region");
+          else regions.add(mirror.region);
+          const mirrorUrl = mirror.url;
+          if (typeof mirrorUrl !== "string" || !httpsUrl(mirrorUrl)) issue(`${path}.url`, "must be an HTTPS URL");
+          else {
+            if (urls.has(mirrorUrl)) issue(`${path}.url`, "must not duplicate an artifact URL");
+            urls.add(mirrorUrl);
+            if (/@(main|master|head)(?:\/|$)/i.test(mirrorUrl)) issue(`${path}.url`, "must pin a tag or immutable commit, not a branch");
+            if (typeof value.version === "string" && !mirrorUrl.includes(value.version) && !/[a-f0-9]{40}/i.test(mirrorUrl)) issue(`${path}.url`, "must contain the manifest version or a full commit hash");
+          }
+        });
+      }
+      if (value.distribution.integrity === undefined) issue("$.distribution.integrity", "is required when mirrors are declared");
+    }
   }
 
   const checkEnumArray = <T extends string>(field: "capabilities" | "permissions", allowed: Set<T>) => {
@@ -116,4 +144,44 @@ export function buildRegistryIndex(manifests: readonly PluginManifest[]): Plugin
     generatedAt: plugins.reduce((latest, plugin) => plugin.updatedAt > latest ? plugin.updatedAt : latest, "1970-01-01T00:00:00Z"),
     plugins,
   };
+}
+
+export function assertOfficialDefaultsProfile(
+  value: unknown,
+  manifests: readonly PluginManifest[],
+): asserts value is OfficialDefaultsProfile {
+  if (!isRecord(value) || !Array.isArray(value.plugins)) {
+    throw new Error("Official defaults profile must be an object with plugins");
+  }
+  const byId = new Map(manifests.map((manifest) => [manifest.id, manifest]));
+  const ids = new Set<string>();
+  const orders = new Set<number>();
+  for (const [index, entry] of value.plugins.entries()) {
+    if (!isRecord(entry) || typeof entry.id !== "string" || typeof entry.version !== "string") {
+      throw new Error(`Official defaults plugin at index ${index} is invalid`);
+    }
+    if (ids.has(entry.id)) throw new Error(`Duplicate official default plugin id: ${entry.id}`);
+    ids.add(entry.id);
+    if (typeof entry.order !== "number" || orders.has(entry.order)) {
+      throw new Error(`Duplicate or invalid official default order for ${entry.id}`);
+    }
+    orders.add(entry.order);
+    const manifest = byId.get(entry.id);
+    if (!manifest) throw new Error(`Official default plugin is not registered: ${entry.id}`);
+    if (manifest.status !== "published") throw new Error(`Official default plugin is not published: ${entry.id}`);
+    if (manifest.version !== entry.version) {
+      throw new Error(`Official default ${entry.id} expects ${entry.version}, registry has ${manifest.version}`);
+    }
+  }
+  if (typeof value.defaultPluginId !== "string" || !ids.has(value.defaultPluginId)) {
+    throw new Error("Official defaultPluginId must reference a profile plugin");
+  }
+}
+
+export function buildOfficialDefaultsProfile(
+  profile: OfficialDefaultsProfile,
+  manifests: readonly PluginManifest[],
+): OfficialDefaultsProfile {
+  assertOfficialDefaultsProfile(profile, manifests);
+  return { ...profile, plugins: [...profile.plugins].sort((a, b) => a.order - b.order) };
 }

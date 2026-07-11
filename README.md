@@ -10,7 +10,10 @@ DancingStore 是 DancingMusic 视觉插件的公开 Registry：收集独立 `Dan
 | --- | --- |
 | `registry/*.json` | 可审计的插件 manifest，一项插件一个文件 |
 | `schema/plugin-manifest.schema.json` | Draft 2020-12 JSON Schema |
+| `profiles/official-defaults.json` | 官方预置插件精确版本、顺序和安装角色 |
+| `schema/official-defaults.schema.json` | 官方预置 profile JSON Schema |
 | `dist/registry.json` | 从 manifest 确定性生成的公开索引，请勿手工编辑 |
+| `dist/official-defaults.json` | 经 Registry 交叉校验后生成的官方预置 profile |
 | `src/` | TypeScript 类型、校验器、索引构建器和只读客户端 |
 | `scripts/generate-registry.ts` | Registry 校验与索引生成工具 |
 
@@ -35,7 +38,13 @@ const mineradio = await store.get("dance-plugin-mineradio");
 
 ```ts
 import registry from "@dancingmusic/dancing-store/registry.json" with { type: "json" };
+import officialDefaults from "@dancingmusic/dancing-store/official-defaults.json" with { type: "json" };
 ```
+
+`officialDefaults` 只引用 Registry 中状态为 `published` 的精确版本。
+`preinstalled` 表示 Release 可携带独立构建 artifact 作为离线 seed，仍不表示
+插件源码属于宿主；`recommended` 表示仅在 Store 中推荐。当前升级交互统一为
+`notify`，由宿主向用户确认后升级。
 
 ## Manifest 约束
 

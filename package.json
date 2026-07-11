@@ -13,7 +13,9 @@
       "require": "./dist/index.cjs"
     },
     "./registry.json": "./dist/registry.json",
-    "./manifest.schema.json": "./schema/plugin-manifest.schema.json"
+    "./official-defaults.json": "./dist/official-defaults.json",
+    "./manifest.schema.json": "./schema/plugin-manifest.schema.json",
+    "./official-defaults.schema.json": "./schema/official-defaults.schema.json"
   },
   "files": [
     "dist",
