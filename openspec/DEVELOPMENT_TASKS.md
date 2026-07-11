@@ -1,26 +1,26 @@
-# DancingStoreSdk Tasks
+# DancingStore Plugin Registry Tasks
 
-- Last-Updated: `2026-05-17`
+- Last-Updated: `2026-07-12`
 
-## Milestone A — 类型与骨架 ✅
+## Milestone A — 边界迁移 ✅
 
-- [x] 定义核心类型（`DanceItem`/`DanceOrder`/`DanceLicense`）
-- [x] API 客户端骨架（`DancingStoreClient`）
-- [x] 统一导出入口 `src/index.ts`
-- [x] 文档站 `docs/index.html`（i18n/搜索/暗色模式）
-- [x] OpenSpec 与任务文档
+- [x] 移除旧商品、订单、支付与授权模型
+- [x] 定义插件 manifest 和公开 Registry API
+- [x] 明确独立实现仓库、Store 与宿主之间的边界
 
-## Milestone B — API 完善
+## Milestone B — Registry 工程化 ✅
 
-- [ ] 完善 HTTP 层实现（鉴权 token 管理、请求超时、错误码映射）
-- [ ] 实现重试策略（指数退避 + 可配置上限）
-- [ ] 实现 `list` / `get` / `createOrder` / `verifyOrder` / `getLicense` 完整逻辑
-- [ ] 添加请求/响应拦截器支持
-- [ ] README 有完整接口示例与配置说明
+- [x] 提供 JSON Schema 和首批官方插件 manifest
+- [x] 提供语义校验、重复检查与确定性索引生成
+- [x] 提供只读查询客户端
+- [x] 添加单元测试与生成器集成测试
+- [x] 添加 Registry CI
+- [x] 更新 README 投稿与消费说明
 
-## Milestone C — 质量保障
+## Milestone C — 后续分发能力
 
-- [ ] 添加单测（vitest）覆盖核心流程
-- [ ] 添加契约测试（mock server 验证请求/响应格式）
-- [ ] 发布 `v0.1.x` 正式标签
-- [ ] CI 流水线配置（lint + typecheck + test）
+- [ ] 为发布产物强制要求 SRI，并在 CI 验证远端内容摘要
+- [ ] 增加签名 provenance / Sigstore 元数据
+- [ ] 增加弃用和安全撤回公告 feed
+- [ ] 与 DancingMusic 宿主完成 Registry 消费集成
+- [ ] 将长期文档迁移至 DancingMusic `docs` 主仓

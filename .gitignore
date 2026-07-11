@@ -1,5 +1,6 @@
 node_modules/
-dist/
+dist/*
+!dist/registry.json
 .DS_Store
 
 # Logs

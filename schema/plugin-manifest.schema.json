@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dancingmusic.github.io/DancingStore/schema/plugin-manifest.schema.json",
+  "title": "DancingStore Plugin Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "id", "name", "summary", "version", "publisher", "repository", "license", "compatibility", "distribution", "capabilities", "permissions", "tags", "status", "submittedAt", "updatedAt"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "1" },
+    "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "name": { "type": "string", "minLength": 1 },
+    "summary": { "type": "string", "minLength": 1, "maxLength": 240 },
+    "version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$" },
+    "publisher": { "$ref": "#/$defs/publisher" },
+    "repository": { "$ref": "#/$defs/httpsUrl" },
+    "license": { "$ref": "#/$defs/license" },
+    "compatibility": { "$ref": "#/$defs/compatibility" },
+    "distribution": { "$ref": "#/$defs/distribution" },
+    "capabilities": {
+      "type": "array", "uniqueItems": true,
+      "items": { "enum": ["audio-reactive", "cover-art", "lyrics", "playlist", "host-actions", "pointer-interaction", "settings"] }
+    },
+    "permissions": {
+      "type": "array", "uniqueItems": true,
+      "items": { "enum": ["host-actions:playback", "host-actions:navigation", "network", "storage"] }
+    },
+    "tags": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" } },
+    "status": { "enum": ["published", "deprecated", "withdrawn"] },
+    "submittedAt": { "type": "string", "format": "date-time" },
+    "updatedAt": { "type": "string", "format": "date-time" }
+  },
+  "$defs": {
+    "httpsUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "publisher": {
+      "type": "object", "additionalProperties": false, "required": ["name", "url"],
+      "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "$ref": "#/$defs/httpsUrl" } }
+    },
+    "license": {
+      "type": "object", "additionalProperties": false, "required": ["name", "url", "commercialUse"],
+      "properties": { "name": { "type": "string", "minLength": 1 }, "url": { "$ref": "#/$defs/httpsUrl" }, "commercialUse": { "type": "boolean" } }
+    },
+    "compatibility": {
+      "type": "object", "additionalProperties": false, "required": ["protocolPackage", "protocolVersion"],
+      "properties": { "protocolPackage": { "const": "@dancingmusic/plugin-sdk" }, "protocolVersion": { "type": "string", "minLength": 1 }, "hostVersion": { "type": "string", "minLength": 1 } }
+    },
+    "distribution": {
+      "type": "object", "additionalProperties": false, "required": ["url", "format"],
+      "properties": { "url": { "$ref": "#/$defs/httpsUrl" }, "format": { "const": "esm" }, "integrity": { "type": "string", "pattern": "^sha(256|384|512)-[A-Za-z0-9+/]+={0,2}$" } }
+    }
+  }
+}

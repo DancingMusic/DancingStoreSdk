@@ -1,74 +1,72 @@
-# OpenSpec: DancingStoreSdk
+# OpenSpec: DancingStore Plugin Registry
 
-- Spec-ID: `dancing-store-sdk-openspec`
-- Version: `2.0.0`
+- Spec-ID: `dancing-store-plugin-registry`
+- Version: `3.0.0`
 - Status: `Active`
-- Last-Updated: `2026-05-17`
+- Last-Updated: `2026-07-12`
 
 ## Scope
 
-定义舞蹈商店 SDK 的边界、API 表面、数据模型和发布策略。
+`DancingStore` 是 DancingMusic 视觉插件实现的公开登记、校验、投稿和分发元数据仓库。它向 DancingMusic 宿主和第三方应用提供稳定、可机器读取的插件目录，但不保存插件实现源码，不定义插件运行时协议，也不承担支付或授权交易。
 
-## 当前状态
+## Ownership
 
-- 包名：`@dancingmusic/dancing-store-sdk`
-- 版本：`v0.1.0`
-- 核心导出：`DanceItem`、`DanceOrder`、`DanceLicense`（类型）、`DancingStoreClient`（API 客户端）
-- 文档站：`docs/index.html`（支持 i18n 中英切换、客户端搜索、暗色模式）
+- `registry/*.json` 是插件登记记录的唯一来源；一个插件一个 manifest。
+- `schema/plugin-manifest.schema.json` 定义可跨工具消费的 manifest JSON Schema。
+- 构建工具校验全部 manifest，并生成确定性的 `dist/registry.json` 分发索引。
+- `@dancingmusic/dancing-store` 导出 manifest 类型、校验器、查询工具和只读 Registry 客户端。
+- 第三方通过 Pull Request 提交或更新 manifest；CI 是合入前的强制校验入口。
 
-## 核心数据模型
+## Plugin manifest
 
-### DanceItem（舞蹈商品）
+每条记录 MUST 包含：
 
-- `id` — 唯一标识
-- `name` — 名称
-- `author` — 作者信息
-- `version` — 版本号
-- `price` — 价格
-- `description` — 描述
-- `previewUrl` — 预览地址
-- `bundleUrl` — 资源包地址
+- `schemaVersion`：当前为 `1`。
+- `id`、`name`、`summary`、`version`：稳定标识和 SemVer 版本。
+- `publisher`、`repository`：发布者及可追溯源码仓库。
+- `license`：许可证名称、许可证 URL 和商业使用标记。
+- `compatibility`：依赖的 DancePlugin 协议包及 SemVer 范围，可选宿主版本范围。
+- `distribution`：固定版本的 HTTPS ESM 构建入口，可选 SRI 完整性值。
+- `capabilities`、`permissions`：供宿主在加载前展示和审查的声明。
+- `status`、`submittedAt`、`updatedAt`：目录生命周期和审计时间。
 
-### DanceOrder（订单）
+Registry MUST NOT 使用浮动分支 URL 作为分发入口。分发 URL 必须固定到 tag 或不可变提交。
 
-- `orderId` — 订单 ID
-- `itemId` — 商品 ID
-- `userId` — 用户 ID
-- `status` — 订单状态
-- `createdAt` — 创建时间
+## Submission and distribution
 
-### DanceLicense（授权）
+1. 投稿者在独立的 `DancePlugin-*` 仓库维护源码、测试、版本、许可证和构建产物。
+2. 投稿者新增或更新 `registry/<plugin-id>.json`，文件名必须与 manifest `id` 一致。
+3. 本仓库 CI 执行 schema/语义校验、重复 ID 检查、索引确定性检查、测试、类型检查和构建。
+4. 合并后生成的 `dist/registry.json` 是宿主和第三方应用的稳定发现入口。
+5. 插件代码仍从 manifest 指向的独立版本化 URL 加载；Store 不复制或打包插件实现。
 
-- `licenseId` — 授权 ID
-- `itemId` — 商品 ID
-- `userId` — 用户 ID
-- `type` — 授权类型
-- `expiresAt` — 过期时间
+## Public API
 
-## API 客户端（DancingStoreClient）
+- `PluginManifest`、`PluginRegistryIndex`、`PluginRegistryQuery`
+- `validatePluginManifest()`、`assertPluginManifest()`、`buildRegistryIndex()`
+- `DancingStoreClient.list()`、`DancingStoreClient.get()`、`DancingStoreClient.refresh()`
 
-计划接口：
-- `list(params?)` — 商品列表
-- `get(id)` — 商品详情
-- `createOrder(itemId)` — 创建订单
-- `verifyOrder(orderId)` — 验证订单
-- `getLicense(itemId)` — 获取授权
+旧版 `StoreItem` / `StoreOrder` 商品订单模型和 `createOrder()` / `verifyOrder()` API 不属于当前 Store 边界，自 `1.0.0` 起移除。
 
 ## MUST
 
-- 独立可构建：`npm run build` 无需宿主环境。
-- 公开 API 在 SemVer 下保持稳定。
-- 仅通过 `src/index.ts` 对外导出。
-- 维护文档站 `docs/index.html`。
+- 独立执行 `npm run validate && npm test && npm run typecheck && npm run build`。
+- 仅通过 `src/index.ts` 导出公开 TypeScript API。
+- Registry 输出按插件 `id` 排序，且相同输入产生相同内容。
+- URL 使用 HTTPS；版本、日期、权限、能力和许可证字段均经过校验。
+- 保留插件来源、许可证与协议兼容性，加载前可审计。
 
 ## MUST NOT
 
-- 依赖 `MusicStoreSdk` 或 `DancingPluginSdk` 内部模块。
-- 包含宿主应用 UI / 运行时代码。
+- 保存插件实现源码、构建插件或在 Store 内运行插件。
+- 定义或复制 `DancePlugin` 协议类型。
+- 直接依赖 DancingMusic 宿主或具体 `DancePlugin-*` 实现包。
+- 恢复商品、价格、订单、支付、用户许可证或 DRM 模型。
+- 保存 Token、Cookie、签名私钥或其他凭据。
 
 ## Release
 
-1. 更新 changelog / README。
-2. Run `npm run typecheck && npm run build`。
-3. 更新 `docs/index.html` 中的版本号。
-4. 发布版本标签和包。
+1. 更新 manifest、OpenSpec、README 和变更版本。
+2. 运行 `npm run validate && npm test && npm run typecheck && npm run build`。
+3. 确认 `dist/registry.json` 已由生成器更新且无手工编辑。
+4. 发布 npm 包、固定版本标签，并部署公开 registry 文件。

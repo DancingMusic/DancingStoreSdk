@@ -1,7 +1,7 @@
 {
   "name": "@dancingmusic/dancing-store",
-  "version": "0.2.0",
-  "description": "Dancing Store for DancingMusic — standalone dance visualization plugin marketplace",
+  "version": "1.0.0",
+  "description": "Validated plugin registry and discovery client for DancingMusic visual plugins",
   "type": "module",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
@@ -11,31 +11,44 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./registry.json": "./dist/registry.json",
+    "./manifest.schema.json": "./schema/plugin-manifest.schema.json"
   },
   "files": [
     "dist",
+    "schema",
+    "registry",
     "README.md",
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean",
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean && npm run registry:generate",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "registry:generate": "node --import tsx scripts/generate-registry.ts",
+    "validate": "npm run registry:generate && node --import tsx scripts/generate-registry.ts --check",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
     "dancingmusic",
     "dancing",
     "store",
-    "sdk"
+    "registry",
+    "plugins"
   ],
   "publishConfig": {
     "access": "public"
   },
   "license": "MIT",
   "devDependencies": {
+    "@types/node": "^24.0.0",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0",
+    "vitest": "^4.1.6"
   }
 }

@@ -1,0 +1,19 @@
+{
+  "$schema": "../schema/plugin-manifest.schema.json",
+  "schemaVersion": "1",
+  "id": "dance-plugin-sonic-topography",
+  "name": "Sonic Topography",
+  "summary": "Audio-driven 3D terrain with visual EQ, ripples, meteors, particles and stage lyrics.",
+  "version": "1.0.2",
+  "publisher": { "name": "DancingMusic", "url": "https://github.com/DancingMusic" },
+  "repository": "https://github.com/DancingMusic/DancePlugin-SonicTopography",
+  "license": { "name": "Non-Commercial Learning License", "url": "https://github.com/DancingMusic/DancePlugin-SonicTopography/blob/main/LICENSE", "commercialUse": false },
+  "compatibility": { "protocolPackage": "@dancingmusic/plugin-sdk", "protocolVersion": "^1.1.0" },
+  "distribution": { "url": "https://cdn.jsdelivr.net/gh/DancingMusic/DancePlugin-SonicTopography@v1.0.2/dist/index.js", "format": "esm" },
+  "capabilities": ["audio-reactive", "lyrics", "pointer-interaction", "settings"],
+  "permissions": [],
+  "tags": ["three-js", "terrain", "lyrics", "visual-eq"],
+  "status": "published",
+  "submittedAt": "2026-06-29T00:00:00Z",
+  "updatedAt": "2026-06-29T00:00:00Z"
+}

@@ -1,0 +1,96 @@
+{
+  "schemaVersion": "1",
+  "generatedAt": "2026-06-29T00:00:00Z",
+  "plugins": [
+    {
+      "$schema": "../schema/plugin-manifest.schema.json",
+      "schemaVersion": "1",
+      "id": "dance-plugin-mineradio",
+      "name": "Mineradio",
+      "summary": "Particle cover, stage lyrics, rhythm reactions and an interactive 3D playlist shelf.",
+      "version": "1.1.2",
+      "publisher": {
+        "name": "DancingMusic",
+        "url": "https://github.com/DancingMusic"
+      },
+      "repository": "https://github.com/DancingMusic/DancePlugin-Mineradio",
+      "license": {
+        "name": "GPL-3.0-only",
+        "url": "https://github.com/DancingMusic/DancePlugin-Mineradio/blob/main/LICENSE",
+        "commercialUse": true
+      },
+      "compatibility": {
+        "protocolPackage": "@dancingmusic/plugin-sdk",
+        "protocolVersion": "^1.1.0"
+      },
+      "distribution": {
+        "url": "https://cdn.jsdelivr.net/gh/DancingMusic/DancePlugin-Mineradio@v1.1.2/dist/index.js",
+        "format": "esm"
+      },
+      "capabilities": [
+        "audio-reactive",
+        "cover-art",
+        "lyrics",
+        "playlist",
+        "host-actions",
+        "pointer-interaction",
+        "settings"
+      ],
+      "permissions": [
+        "host-actions:playback",
+        "host-actions:navigation"
+      ],
+      "tags": [
+        "three-js",
+        "particles",
+        "lyrics",
+        "playlist"
+      ],
+      "status": "published",
+      "submittedAt": "2026-06-29T00:00:00Z",
+      "updatedAt": "2026-06-29T00:00:00Z"
+    },
+    {
+      "$schema": "../schema/plugin-manifest.schema.json",
+      "schemaVersion": "1",
+      "id": "dance-plugin-sonic-topography",
+      "name": "Sonic Topography",
+      "summary": "Audio-driven 3D terrain with visual EQ, ripples, meteors, particles and stage lyrics.",
+      "version": "1.0.2",
+      "publisher": {
+        "name": "DancingMusic",
+        "url": "https://github.com/DancingMusic"
+      },
+      "repository": "https://github.com/DancingMusic/DancePlugin-SonicTopography",
+      "license": {
+        "name": "Non-Commercial Learning License",
+        "url": "https://github.com/DancingMusic/DancePlugin-SonicTopography/blob/main/LICENSE",
+        "commercialUse": false
+      },
+      "compatibility": {
+        "protocolPackage": "@dancingmusic/plugin-sdk",
+        "protocolVersion": "^1.1.0"
+      },
+      "distribution": {
+        "url": "https://cdn.jsdelivr.net/gh/DancingMusic/DancePlugin-SonicTopography@v1.0.2/dist/index.js",
+        "format": "esm"
+      },
+      "capabilities": [
+        "audio-reactive",
+        "lyrics",
+        "pointer-interaction",
+        "settings"
+      ],
+      "permissions": [],
+      "tags": [
+        "three-js",
+        "terrain",
+        "lyrics",
+        "visual-eq"
+      ],
+      "status": "published",
+      "submittedAt": "2026-06-29T00:00:00Z",
+      "updatedAt": "2026-06-29T00:00:00Z"
+    }
+  ]
+}

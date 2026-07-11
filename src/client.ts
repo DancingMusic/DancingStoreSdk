@@ -1,49 +1,60 @@
-import type { StoreClientOptions, StoreItem, StoreListQuery, StoreOrder } from "./types";
+import { assertPluginManifest, buildRegistryIndex } from "./validation";
+import type {
+  DancingStoreClientOptions,
+  PluginManifest,
+  PluginRegistryIndex,
+  PluginRegistryQuery,
+} from "./types";
 
 export class DancingStoreClient {
-  private readonly baseUrl: string;
-  private readonly token?: string;
+  private readonly registryUrl: string;
+  private readonly fetchImpl: typeof globalThis.fetch;
+  private index: PluginRegistryIndex | null = null;
 
-  constructor(options: StoreClientOptions) {
-    this.baseUrl = options.baseUrl.replace(/\/$/, "");
-    this.token = options.token;
+  constructor(options: DancingStoreClientOptions) {
+    if (!options.registryUrl) throw new Error("registryUrl is required");
+    this.registryUrl = options.registryUrl;
+    this.fetchImpl = options.fetch ?? globalThis.fetch;
+    if (!this.fetchImpl) throw new Error("A fetch implementation is required");
   }
 
-  async list(_query: StoreListQuery = {}): Promise<StoreItem[]> {
-    return [];
-  }
-
-  async get(itemId: string): Promise<StoreItem | null> {
-    if (!itemId) {
-      throw new Error("itemId is required");
+  async refresh(): Promise<PluginRegistryIndex> {
+    const response = await this.fetchImpl(this.registryUrl);
+    if (!response.ok) {
+      throw new Error(`Unable to load DancingStore registry: HTTP ${response.status}`);
     }
-    return null;
+
+    const value = (await response.json()) as Partial<PluginRegistryIndex>;
+    if (value.schemaVersion !== "1" || !Array.isArray(value.plugins)) {
+      throw new Error("Invalid DancingStore registry index");
+    }
+    value.plugins.forEach((manifest) => assertPluginManifest(manifest));
+    this.index = buildRegistryIndex(value.plugins);
+    return this.index;
   }
 
-  async createOrder(itemId: string): Promise<StoreOrder> {
-    if (!itemId) {
-      throw new Error("itemId is required");
-    }
-    return {
-      orderId: "",
-      itemId,
-      amount: 0,
-      currency: "USD",
-      status: "pending"
-    };
+  async list(query: PluginRegistryQuery = {}): Promise<PluginManifest[]> {
+    const index = this.index ?? (await this.refresh());
+    const keyword = query.keyword?.trim().toLowerCase();
+    return index.plugins.filter((plugin) => {
+      if (query.status && plugin.status !== query.status) return false;
+      if (query.tag && !plugin.tags.includes(query.tag)) return false;
+      if (query.capability && !plugin.capabilities.includes(query.capability)) return false;
+      if (!keyword) return true;
+      return [plugin.id, plugin.name, plugin.summary, ...plugin.tags]
+        .join(" ")
+        .toLowerCase()
+        .includes(keyword);
+    });
   }
 
-  async verifyOrder(orderId: string): Promise<StoreOrder | null> {
-    if (!orderId) {
-      throw new Error("orderId is required");
-    }
-    return null;
+  async get(pluginId: string): Promise<PluginManifest | null> {
+    if (!pluginId) throw new Error("pluginId is required");
+    const index = this.index ?? (await this.refresh());
+    return index.plugins.find((plugin) => plugin.id === pluginId) ?? null;
   }
 
   get config() {
-    return {
-      baseUrl: this.baseUrl,
-      hasToken: Boolean(this.token)
-    };
+    return { registryUrl: this.registryUrl, loaded: this.index !== null };
   }
 }
