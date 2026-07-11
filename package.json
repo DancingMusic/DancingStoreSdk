@@ -29,6 +29,7 @@
     "test": "vitest run",
     "registry:generate": "node --import tsx scripts/generate-registry.ts",
     "validate": "npm run registry:generate && node --import tsx scripts/generate-registry.ts --check",
+    "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
