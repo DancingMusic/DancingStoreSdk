@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dancingmusic.github.io/DancingStore/schema/plugin-manifest.schema.json",
+  "$id": "https://raw.githubusercontent.com/DancingMusic/DancingStore/main/schema/plugin-manifest.schema.json",
   "title": "DancingStore Plugin Manifest",
   "type": "object",
   "additionalProperties": false,

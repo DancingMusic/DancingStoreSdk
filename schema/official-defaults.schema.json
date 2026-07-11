@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://dancingmusic.github.io/DancingStore/schema/official-defaults.schema.json",
+  "$id": "https://raw.githubusercontent.com/DancingMusic/DancingStore/main/schema/official-defaults.schema.json",
   "title": "DancingStore Official Defaults Profile",
   "type": "object",
   "additionalProperties": false,

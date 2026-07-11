@@ -9,6 +9,8 @@
 
 `DancingStore` 是 DancingMusic 视觉插件实现的公开登记、校验、投稿和分发元数据仓库。它向 DancingMusic 宿主和第三方应用提供稳定、可机器读取的插件目录，但不保存插件实现源码，不定义插件运行时协议，也不承担支付或授权交易。
 
+统一长文档位于 `https://dancingmusic.github.io/docs/ecosystem/stores`；本仓 Pages 仅保留旧地址兼容跳转，Schema 与 Registry 仍由本仓维护。
+
 ## Ownership
 
 - `registry/*.json` 是插件登记记录的唯一来源；一个插件一个 manifest。
