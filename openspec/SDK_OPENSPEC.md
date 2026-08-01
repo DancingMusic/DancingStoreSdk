@@ -1,9 +1,9 @@
 # OpenSpec: DancingStore Plugin Registry
 
 - Spec-ID: `dancing-store-plugin-registry`
-- Version: `3.1.0`
+- Version: `3.2.0`
 - Status: `Active`
-- Last-Updated: `2026-07-12`
+- Last-Updated: `2026-08-01`
 
 ## Scope
 
@@ -22,6 +22,9 @@
   Registry 中已经发布的精确插件版本，不复制插件实现或分发元数据。
 - `schema/official-defaults.schema.json` 定义官方预置 profile，构建产物
   `dist/official-defaults.json` 由生成器确定性写出，禁止手工编辑。
+- `profiles/official-catalog.json` 是官方插件源的精确版本允许列表；Registry
+  中存在记录不代表自动进入官方源。生成的 `dist/official-catalog.json`
+  才是 StoreService 验证和签名的目录 payload。
 
 ## Plugin manifest
 
@@ -29,10 +32,13 @@
 
 - `schemaVersion`：当前为 `1`。
 - `id`、`name`、`summary`、`version`：稳定标识和 SemVer 版本。
+- `runtimeId`：`published` 记录必须显式声明 artifact 中
+  `createDancePlugin().config.id` 的运行时身份；它不得由宿主根据 manifest
+  `id` 的前缀或仓库名猜测。
 - `publisher`、`repository`：发布者及可追溯源码仓库。
 - `license`：许可证名称、许可证 URL 和商业使用标记。
 - `compatibility`：依赖的 DancePlugin 协议包及 SemVer 范围，可选宿主版本范围。
-- `distribution`：固定版本的 HTTPS ESM 构建入口，可选 SRI 完整性值。
+- `distribution`：固定版本的 HTTPS ESM 构建入口；`published` 记录必须提供 SHA-256 完整性值。
 - `distribution.mirrors`：可选的国内/国际固定版本镜像。为兼容 v1，
   `distribution.url` 仍是规范入口；所有镜像必须分发与该入口相同的字节，
   并共用 `distribution.integrity`。
@@ -44,6 +50,11 @@
 Registry MUST NOT 使用浮动分支 URL 作为分发入口。分发 URL 必须固定到 tag 或不可变提交。
 镜像同样不得使用浮动分支，且同一地域最多声明一个入口。
 
+`published` 插件的 `distribution.integrity` 为必填 SHA-256。私有 Git
+Release、Package Registry 或 Git LFS 可以作为不可变冷源，但私有 URL 与
+访问凭据不得进入公开 manifest。公开 `distribution.url` 与镜像必须指向
+StoreService 中已经验摘要并原子发布的内容寻址路径。
+
 ## Submission and distribution
 
 1. 投稿者在独立的 `DancePlugin-*` 仓库维护源码、测试、版本、许可证和构建产物。
@@ -51,6 +62,18 @@ Registry MUST NOT 使用浮动分支 URL 作为分发入口。分发 URL 必须�
 3. 本仓库 CI 执行 schema/语义校验、重复 ID 检查、索引确定性检查、测试、类型检查和构建。
 4. 合并后生成的 `dist/registry.json` 是宿主和第三方应用的稳定发现入口。
 5. 插件代码仍从 manifest 指向的独立版本化 URL 加载；Store 不复制或打包插件实现。
+6. 受保护发布流水线从私有冷源导入制品，执行大小限制与 SHA-256
+   校验，然后由 StoreService 发布签名目录和公开缓存。
+
+StoreService 使用统一扁平签名信封发布目录：数字 `schemaVersion`、
+`algorithm: ES256`、`keyId`、`payloadKind`、单调递增的 `sequence`、
+`issuedAt`、`expiresAt`、validated `payload`，以及覆盖前述字段规范化 JSON
+的 base64url IEEE-P1363 `signature`。签名私钥只存在于受保护 CI/KMS，不得提交到本仓、
+写入生成目录或输出到日志。
+
+官方目录 profile 中的每项必须对应唯一、状态为 `published`、版本精确匹配
+且具有 SHA-256 与 `runtimeId` 的 manifest。空 profile 合法；未选择或已撤回
+记录可以保留为审核历史，但不得出现在 StoreService 发布输入中。
 
 ## Official defaults profile
 
@@ -65,6 +88,8 @@ Registry MUST NOT 使用浮动分支 URL 作为分发入口。分发 URL 必须�
   `version` 完全一致的记录。默认插件必须存在于 profile 中。
 - Profile 是组合策略，不是实现清单。artifact URL、完整性、许可证、权限和
   协议兼容性继续以对应 Registry manifest 为准，避免两份事实来源漂移。
+- 当没有任何满足发布校验的插件时，Profile 可以为空且不声明
+  `defaultPluginId`；宿主必须把它解释为“没有官方默认插件”，不得回退到未审核记录。
 
 ## Public API
 
@@ -79,8 +104,11 @@ Registry MUST NOT 使用浮动分支 URL 作为分发入口。分发 URL 必须�
 - 独立执行 `npm run validate && npm test && npm run typecheck && npm run build`。
 - 仅通过 `src/index.ts` 导出公开 TypeScript API。
 - Registry 输出按插件 `id` 排序，且相同输入产生相同内容。
+- `published` 插件的 `runtimeId` 必须存在、格式合法且在发布集合中唯一。
 - 官方预置输出按 `order` 排序，并校验引用存在、状态、版本和默认项。
 - URL 使用 HTTPS；版本、日期、权限、能力和许可证字段均经过校验。
+- 下载并验证每一个 `published` canonical/mirror artifact 的字节上限与
+  SHA-256，禁止重定向且失败时不得发布目录。
 - 保留插件来源、许可证与协议兼容性，加载前可审计。
 
 ## MUST NOT

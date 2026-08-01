@@ -2,6 +2,7 @@
   "$schema": "../schema/plugin-manifest.schema.json",
   "schemaVersion": "1",
   "id": "dance-plugin-beat-lyric-cuts",
+  "runtimeId": "beat-lyric-cuts",
   "name": "Beat Lyric Cuts",
   "summary": "Beat-synced lyric sections, cover slices and kinetic typography for the DancingMusic stage.",
   "version": "1.0.0",
@@ -19,7 +20,7 @@
   "capabilities": ["audio-reactive", "cover-art", "lyrics"],
   "permissions": [],
   "tags": ["lyrics", "kinetic-typography", "beat-sync"],
-  "status": "published",
+  "status": "withdrawn",
   "submittedAt": "2026-07-12T01:40:00Z",
-  "updatedAt": "2026-07-12T01:40:00Z"
+  "updatedAt": "2026-08-01T00:00:00Z"
 }

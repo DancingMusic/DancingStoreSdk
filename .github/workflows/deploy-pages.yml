@@ -5,6 +5,13 @@ on:
     branches: [main]
     paths:
       - 'docs/**'
+      - 'registry/**'
+      - 'profiles/**'
+      - 'schema/**'
+      - 'src/**'
+      - 'scripts/**'
+      - 'package.json'
+      - 'package-lock.json'
       - '.github/workflows/deploy-pages.yml'
   workflow_dispatch:
 
@@ -27,13 +34,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build verified Pages payload
+        run: |
+          npm ci
+          npm run build
+          npm run verify:artifacts
+          mkdir -p public
+          cp -R docs/. public/
+          cp dist/registry.json public/registry.json
+          cp dist/official-catalog.json public/official-catalog.json
+          cp dist/official-defaults.json public/official-defaults.json
+
       - name: Setup Pages
         uses: actions/configure-pages@v5
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: docs
+          path: public
 
       - name: Deploy to GitHub Pages
         id: deployment

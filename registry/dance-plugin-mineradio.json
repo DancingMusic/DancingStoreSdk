@@ -13,7 +13,7 @@
   "capabilities": ["audio-reactive", "cover-art", "lyrics", "playlist", "host-actions", "pointer-interaction", "settings"],
   "permissions": ["host-actions:playback", "host-actions:navigation"],
   "tags": ["three-js", "particles", "lyrics", "playlist"],
-  "status": "published",
+  "status": "withdrawn",
   "submittedAt": "2026-06-29T00:00:00Z",
-  "updatedAt": "2026-06-29T00:00:00Z"
+  "updatedAt": "2026-08-01T00:00:00Z"
 }

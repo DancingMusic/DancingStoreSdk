@@ -39,11 +39,17 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
     "repository", "license", "compatibility", "distribution", "capabilities", "permissions",
     "tags", "status", "submittedAt", "updatedAt"];
   for (const field of required) if (!(field in value)) issue(`$.${field}`, "is required");
-  const allowed = new Set(["$schema", ...required, "releaseNotesUrl", "publishedAt"]);
+  const allowed = new Set(["$schema", ...required, "runtimeId", "releaseNotesUrl", "publishedAt"]);
   for (const field of Object.keys(value)) if (!allowed.has(field)) issue(`$.${field}`, "is not allowed");
   if (value.schemaVersion !== "1") issue("$.schemaVersion", 'must equal "1"');
   if (value.$schema !== undefined && typeof value.$schema !== "string") issue("$.$schema", "must be a string");
   if (typeof value.id !== "string" || !id.test(value.id)) issue("$.id", "must be a lowercase kebab-case id");
+  if (value.runtimeId !== undefined && (typeof value.runtimeId !== "string" || !id.test(value.runtimeId))) {
+    issue("$.runtimeId", "must be a lowercase kebab-case id");
+  }
+  if (value.status === "published" && value.runtimeId === undefined) {
+    issue("$.runtimeId", "is required for published plugins");
+  }
   for (const field of ["name", "summary"] as const) {
     if (typeof value[field] !== "string" || !value[field].trim()) issue(`$.${field}`, "must be a non-empty string");
   }
@@ -83,6 +89,10 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
       !value.distribution.url.includes(value.version) && !/[a-f0-9]{40}/i.test(value.distribution.url)) issue("$.distribution.url", "must contain the manifest version or a full commit hash");
     if (value.distribution.integrity !== undefined &&
       (typeof value.distribution.integrity !== "string" || !/^sha(256|384|512)-[A-Za-z0-9+/]+={0,2}$/.test(value.distribution.integrity))) issue("$.distribution.integrity", "must be an SRI sha256/384/512 value");
+    if (value.status === "published" &&
+      (typeof value.distribution.integrity !== "string" || !/^sha256-[A-Za-z0-9+/]{43}=$/.test(value.distribution.integrity))) {
+      issue("$.distribution.integrity", "published plugins require an exact SHA-256 SRI value");
+    }
     if (value.distribution.mirrors !== undefined) {
       if (!Array.isArray(value.distribution.mirrors) || value.distribution.mirrors.length === 0 || value.distribution.mirrors.length > 2) {
         issue("$.distribution.mirrors", "must contain one or two regional mirrors");
@@ -133,10 +143,16 @@ export function assertPluginManifest(value: unknown): asserts value is PluginMan
 
 export function buildRegistryIndex(manifests: readonly PluginManifest[]): PluginRegistryIndex {
   const ids = new Set<string>();
+  const publishedRuntimeIds = new Set<string>();
   const plugins = manifests.map((manifest) => {
     assertPluginManifest(manifest);
     if (ids.has(manifest.id)) throw new Error(`Duplicate plugin id: ${manifest.id}`);
     ids.add(manifest.id);
+    if (manifest.status === "published") {
+      if (!manifest.runtimeId) throw new Error(`Published plugin has no runtimeId: ${manifest.id}`);
+      if (publishedRuntimeIds.has(manifest.runtimeId)) throw new Error(`Duplicate published plugin runtimeId: ${manifest.runtimeId}`);
+      publishedRuntimeIds.add(manifest.runtimeId);
+    }
     return manifest;
   }).sort((a, b) => a.id.localeCompare(b.id));
   return {
@@ -172,6 +188,10 @@ export function assertOfficialDefaultsProfile(
     if (manifest.version !== entry.version) {
       throw new Error(`Official default ${entry.id} expects ${entry.version}, registry has ${manifest.version}`);
     }
+  }
+  if (value.plugins.length === 0) {
+    if (value.defaultPluginId !== undefined) throw new Error("Empty official defaults must not declare defaultPluginId");
+    return;
   }
   if (typeof value.defaultPluginId !== "string" || !ids.has(value.defaultPluginId)) {
     throw new Error("Official defaultPluginId must reference a profile plugin");

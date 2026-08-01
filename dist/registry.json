@@ -1,11 +1,12 @@
 {
   "schemaVersion": "1",
-  "generatedAt": "2026-07-12T01:40:00Z",
+  "generatedAt": "2026-08-01T00:00:00Z",
   "plugins": [
     {
       "$schema": "../schema/plugin-manifest.schema.json",
       "schemaVersion": "1",
       "id": "dance-plugin-beat-lyric-cuts",
+      "runtimeId": "beat-lyric-cuts",
       "name": "Beat Lyric Cuts",
       "summary": "Beat-synced lyric sections, cover slices and kinetic typography for the DancingMusic stage.",
       "version": "1.0.0",
@@ -41,9 +42,9 @@
         "kinetic-typography",
         "beat-sync"
       ],
-      "status": "published",
+      "status": "withdrawn",
       "submittedAt": "2026-07-12T01:40:00Z",
-      "updatedAt": "2026-07-12T01:40:00Z"
+      "updatedAt": "2026-08-01T00:00:00Z"
     },
     {
       "$schema": "../schema/plugin-manifest.schema.json",
@@ -89,9 +90,9 @@
         "lyrics",
         "playlist"
       ],
-      "status": "published",
+      "status": "withdrawn",
       "submittedAt": "2026-06-29T00:00:00Z",
-      "updatedAt": "2026-06-29T00:00:00Z"
+      "updatedAt": "2026-08-01T00:00:00Z"
     },
     {
       "$schema": "../schema/plugin-manifest.schema.json",
@@ -131,9 +132,9 @@
         "lyrics",
         "visual-eq"
       ],
-      "status": "published",
+      "status": "withdrawn",
       "submittedAt": "2026-06-29T00:00:00Z",
-      "updatedAt": "2026-06-29T00:00:00Z"
+      "updatedAt": "2026-08-01T00:00:00Z"
     }
   ]
 }

@@ -11,13 +11,17 @@ const registryDirectory = resolve(root, "registry");
 const outputPath = resolve(root, "dist/registry.json");
 const defaultsInputPath = resolve(root, "profiles/official-defaults.json");
 const defaultsOutputPath = resolve(root, "dist/official-defaults.json");
+const officialCatalogInputPath = resolve(root, "profiles/official-catalog.json");
+const officialCatalogOutputPath = resolve(root, "dist/official-catalog.json");
 const check = process.argv.includes("--check");
 const schema = JSON.parse(await readFile(resolve(root, "schema/plugin-manifest.schema.json"), "utf8"));
 const defaultsSchema = JSON.parse(await readFile(resolve(root, "schema/official-defaults.schema.json"), "utf8"));
+const officialCatalogSchema = JSON.parse(await readFile(resolve(root, "schema/official-catalog.schema.json"), "utf8"));
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 const validateSchema = ajv.compile(schema);
 const validateDefaultsSchema = ajv.compile(defaultsSchema);
+const validateOfficialCatalogSchema = ajv.compile(officialCatalogSchema);
 
 const files = (await readdir(registryDirectory)).filter((file) => file.endsWith(".json")).sort();
 if (files.length === 0) throw new Error("Registry contains no plugin manifests");
@@ -43,17 +47,48 @@ if (!validateDefaultsSchema(defaultsValue)) {
   throw new Error(`official-defaults.json does not match official-defaults.schema.json:\n${details}`);
 }
 const defaultsOutput = `${JSON.stringify(buildOfficialDefaultsProfile(defaultsValue as OfficialDefaultsProfile, manifests), null, 2)}\n`;
+const officialCatalogProfile: unknown = JSON.parse(await readFile(officialCatalogInputPath, "utf8"));
+if (!validateOfficialCatalogSchema(officialCatalogProfile)) {
+  const details = (validateOfficialCatalogSchema.errors ?? []).map((error) => `${error.instancePath || "/"} ${error.message}`).join("\n");
+  throw new Error(`official-catalog.json does not match official-catalog.schema.json:\n${details}`);
+}
+const profile = officialCatalogProfile as {
+  updatedAt: string;
+  entries: Array<{ id: string; version: string }>;
+};
+const manifestsById = new Map(manifests.map((manifest) => [manifest.id, manifest]));
+const selectedIds = new Set<string>();
+const officialPlugins = profile.entries.map((entry) => {
+  if (selectedIds.has(entry.id)) throw new Error(`Duplicate official catalog plugin id: ${entry.id}`);
+  selectedIds.add(entry.id);
+  const manifest = manifestsById.get(entry.id);
+  if (!manifest) throw new Error(`Official catalog plugin is not registered: ${entry.id}`);
+  if (manifest.status !== "published") throw new Error(`Official catalog plugin is not published: ${entry.id}`);
+  if (manifest.version !== entry.version) {
+    throw new Error(`Official catalog ${entry.id} expects ${entry.version}, registry has ${manifest.version}`);
+  }
+  return manifest;
+}).sort((left, right) => left.id.localeCompare(right.id));
+const officialCatalogOutput = `${JSON.stringify({
+  schemaVersion: "1",
+  generatedAt: profile.updatedAt,
+  plugins: officialPlugins,
+}, null, 2)}\n`;
 if (check) {
   let existing = "";
   let existingDefaults = "";
+  let existingOfficialCatalog = "";
   try { existing = await readFile(outputPath, "utf8"); } catch { /* handled below */ }
   try { existingDefaults = await readFile(defaultsOutputPath, "utf8"); } catch { /* handled below */ }
+  try { existingOfficialCatalog = await readFile(officialCatalogOutputPath, "utf8"); } catch { /* handled below */ }
   if (existing !== output) throw new Error("dist/registry.json is stale; run npm run registry:generate");
   if (existingDefaults !== defaultsOutput) throw new Error("dist/official-defaults.json is stale; run npm run registry:generate");
-  console.log(`Validated ${manifests.length} plugin manifests, registry and official defaults`);
+  if (existingOfficialCatalog !== officialCatalogOutput) throw new Error("dist/official-catalog.json is stale; run npm run registry:generate");
+  console.log(`Validated ${manifests.length} plugin manifests, ${officialPlugins.length} official plugins, registry and profiles`);
 } else {
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, output);
   await writeFile(defaultsOutputPath, defaultsOutput);
-  console.log(`Generated registry and official defaults from ${manifests.length} plugin manifests`);
+  await writeFile(officialCatalogOutputPath, officialCatalogOutput);
+  console.log(`Generated registry and profiles from ${manifests.length} plugin manifests (${officialPlugins.length} official)`);
 }

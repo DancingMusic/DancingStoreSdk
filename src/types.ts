@@ -50,6 +50,7 @@ export interface PluginManifest {
   $schema?: string;
   schemaVersion: typeof PLUGIN_MANIFEST_SCHEMA_VERSION;
   id: string;
+  runtimeId?: string;
   name: string;
   summary: string;
   version: string;
@@ -88,7 +89,7 @@ export interface OfficialDefaultsProfile {
   id: "official-defaults";
   channel: "stable" | "beta";
   revision: string;
-  defaultPluginId: string;
+  defaultPluginId?: string;
   plugins: OfficialDefaultPlugin[];
   updatedAt: string;
 }

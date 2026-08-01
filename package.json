@@ -25,12 +25,16 @@
     "LICENSE"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format esm,cjs --dts --clean && npm run registry:generate",
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean && npm run registry:generate && npm run store-service:generate",
     "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "registry:generate": "node --import tsx scripts/generate-registry.ts",
-    "validate": "npm run registry:generate && node --import tsx scripts/generate-registry.ts --check",
+    "validate": "npm run registry:generate && node --import tsx scripts/generate-registry.ts --check && npm run store-service:generate && npm run store-service:check",
+    "verify:artifacts": "node scripts/verify-artifacts.mjs",
+    "store-service:generate": "node scripts/generate-store-service-publish.mjs",
+    "store-service:check": "node scripts/generate-store-service-publish.mjs --check",
+    "release:prepare": "npm run build && npm run store-service:check && npm run verify:artifacts",
     "prepare": "npm run build",
     "prepublishOnly": "npm run build"
   },

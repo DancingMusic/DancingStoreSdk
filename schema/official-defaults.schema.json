@@ -4,7 +4,7 @@
   "title": "DancingStore Official Defaults Profile",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schemaVersion", "id", "channel", "revision", "defaultPluginId", "plugins", "updatedAt"],
+  "required": ["schemaVersion", "id", "channel", "revision", "plugins", "updatedAt"],
   "properties": {
     "$schema": { "type": "string" },
     "schemaVersion": { "const": "1" },
@@ -14,11 +14,17 @@
     "defaultPluginId": { "$ref": "#/$defs/id" },
     "plugins": {
       "type": "array",
-      "minItems": 1,
       "items": { "$ref": "#/$defs/plugin" }
     },
     "updatedAt": { "type": "string", "format": "date-time" }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "plugins": { "type": "array", "minItems": 1 } }, "required": ["plugins"] },
+      "then": { "properties": { "defaultPluginId": { "$ref": "#/$defs/id" } }, "required": ["defaultPluginId"] },
+      "else": { "not": { "required": ["defaultPluginId"] } }
+    }
+  ],
   "$defs": {
     "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "plugin": {

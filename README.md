@@ -11,9 +11,12 @@ DancingStore 是 DancingMusic 视觉插件的公开 Registry：收集独立 `Dan
 | `registry/*.json` | 可审计的插件 manifest，一项插件一个文件 |
 | `schema/plugin-manifest.schema.json` | Draft 2020-12 JSON Schema |
 | `profiles/official-defaults.json` | 官方预置插件精确版本、顺序和安装角色 |
+| `profiles/official-catalog.json` | 官方插件源允许发布的精确版本集合 |
 | `schema/official-defaults.schema.json` | 官方预置 profile JSON Schema |
 | `dist/registry.json` | 从 manifest 确定性生成的公开索引，请勿手工编辑 |
 | `dist/official-defaults.json` | 经 Registry 交叉校验后生成的官方预置 profile |
+| `dist/official-catalog.json` | 根据官方目录 profile 生成的可签名目录 payload |
+| `dist/store-service-publish.json` | 供 StoreService 导入的确定性未签名发布输入 |
 | `src/` | TypeScript 类型、校验器、索引构建器和只读客户端 |
 | `scripts/generate-registry.ts` | Registry 校验与索引生成工具 |
 
@@ -45,10 +48,19 @@ import officialDefaults from "@dancingmusic/dancing-store/official-defaults.json
 `preinstalled` 表示 Release 可携带独立构建 artifact 作为离线 seed，仍不表示
 插件源码属于宿主；`recommended` 表示仅在 Store 中推荐。当前升级交互统一为
 `notify`，由宿主向用户确认后升级。
+当没有符合分发校验的插件时，该 profile 可以为空且不提供默认插件。
 
 ## Manifest 约束
 
 Manifest 记录身份、版本、发布者、源码来源、许可证、协议兼容范围、固定版本 ESM 入口、能力、权限和生命周期状态。完整字段以 [`schema/plugin-manifest.schema.json`](schema/plugin-manifest.schema.json) 为准。
+
+`published` manifest 还必须显式声明 `runtimeId`，其值等于 artifact 中
+`createDancePlugin().config.id`。Manifest `id` 是 Store 记录身份，`runtimeId`
+是加载后的实例身份；宿主不得通过删除前缀来猜测二者映射。
+
+Registry 中存在 manifest 不表示它自动进入官方源。只有
+`profiles/official-catalog.json` 选择的精确 `published` 版本才会写入
+`dist/official-catalog.json` 和 StoreService 发布输入。
 
 分发入口必须：
 
@@ -57,6 +69,7 @@ Manifest 记录身份、版本、发布者、源码来源、许可证、协议�
 - 提供 ESM 构建；
 - 不使用 `main`、`master` 或其他浮动分支；
 - 如填写 `integrity`，使用合法的 SRI `sha256` / `sha384` / `sha512` 值。
+- `published` 记录必须填写精确的 SHA-256 SRI；没有可验证摘要的记录只能先撤回，不能编造摘要。
 
 许可证不是装饰字段。宿主和用户可据 `commercialUse` 在加载前识别非商业限制；具体权利仍以插件仓库中的许可证原文为准。
 
@@ -78,12 +91,16 @@ npm run validate
 npm test
 npm run typecheck
 npm run build
+npm run store-service:check
+npm run release:prepare
 ```
 
 - `npm run registry:generate` 校验 `registry/` 并更新 `dist/registry.json`。
 - `npm run validate` 生成后再次检查索引内容一致。
 - `npm test` 覆盖 manifest 语义、重复 ID、确定性排序和客户端查询。
 - CI 还会验证生成后 `dist/registry.json` 没有未提交差异。
+- `npm run verify:artifacts` 最多下载 10 MiB，禁止重定向，并验证所有 `published` canonical/mirror URL 的 SHA-256。
+- `npm run release:prepare` 生成不含签名、私钥和冷源凭据的 `dist/store-service-publish.json`；签名信封由受保护的 StoreService 发布阶段添加。
 
 ## 边界与安全
 

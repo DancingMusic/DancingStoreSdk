@@ -19,7 +19,8 @@
 
 ## Milestone C — 后续分发能力
 
-- [ ] 为发布产物强制要求 SRI，并在 CI 验证远端内容摘要
+- [x] 为 published 产物强制要求 SHA-256，并在 CI 有界、无重定向地验证远端内容摘要
+- [x] 生成确定性的 StoreService 未签名发布输入
 - [ ] 增加签名 provenance / Sigstore 元数据
 - [ ] 增加弃用和安全撤回公告 feed
 - [ ] 与 DancingMusic 宿主完成 Registry 消费集成

@@ -22,5 +22,8 @@ jobs:
       - run: npm test
       - run: npm run typecheck
       - run: npm run build
+      - run: npm run store-service:check
+      - name: Verify every published plugin artifact against SHA-256
+        run: npm run verify:artifacts
       - name: Verify generated registry is committed
-        run: git diff --exit-code -- dist/registry.json
+        run: git diff --exit-code -- dist/registry.json dist/official-catalog.json dist/store-service-publish.json

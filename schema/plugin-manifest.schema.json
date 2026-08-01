@@ -9,6 +9,7 @@
     "$schema": { "type": "string" },
     "schemaVersion": { "const": "1" },
     "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+    "runtimeId": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
     "name": { "type": "string", "minLength": 1 },
     "summary": { "type": "string", "minLength": 1, "maxLength": 240 },
     "version": { "type": "string", "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)(?:-[0-9A-Za-z.-]+)?(?:\\+[0-9A-Za-z.-]+)?$" },
@@ -32,6 +33,22 @@
     "submittedAt": { "type": "string", "format": "date-time" },
     "updatedAt": { "type": "string", "format": "date-time" }
   },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "published" } }, "required": ["status"] },
+      "then": {
+        "properties": {
+          "runtimeId": { "type": "string" },
+          "distribution": {
+            "type": "object",
+            "properties": { "integrity": { "type": "string", "pattern": "^sha256-[A-Za-z0-9+/]{43}=$" } },
+            "required": ["integrity"]
+          }
+        },
+        "required": ["runtimeId"]
+      }
+    }
+  ],
   "$defs": {
     "httpsUrl": { "type": "string", "format": "uri", "pattern": "^https://" },
     "publisher": {

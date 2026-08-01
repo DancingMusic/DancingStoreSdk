@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "kind": "plugins",
+  "registryPath": "official-catalog.json",
+  "payloadSha256": "26296dae213675c7c4da40259d1e80d5995c1840d4ed16cf69956bb93a305d03",
+  "artifacts": []
+}

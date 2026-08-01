@@ -1,6 +1,8 @@
 node_modules/
 dist/*
 !dist/registry.json
+!dist/official-catalog.json
+!dist/store-service-publish.json
 .DS_Store
 
 # Logs
