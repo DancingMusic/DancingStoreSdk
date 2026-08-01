@@ -1,6 +1,7 @@
 export const PLUGIN_MANIFEST_SCHEMA_VERSION = "1" as const;
 export const PLUGIN_REGISTRY_SCHEMA_VERSION = "1" as const;
 export const OFFICIAL_DEFAULTS_SCHEMA_VERSION = "1" as const;
+export const OFFICIAL_CATALOG_SCHEMA_VERSION = "1" as const;
 
 export type PluginCapability =
   | "audio-reactive"
@@ -92,6 +93,34 @@ export interface OfficialDefaultsProfile {
   defaultPluginId?: string;
   plugins: OfficialDefaultPlugin[];
   updatedAt: string;
+}
+
+export interface OfficialCatalogEntry {
+  id: string;
+  version: string;
+  state: "publish" | "withdraw";
+  reason?: string;
+  at?: string;
+}
+
+export interface OfficialCatalogProfile {
+  $schema?: string;
+  schemaVersion: typeof OFFICIAL_CATALOG_SCHEMA_VERSION;
+  id: "official-plugins";
+  entries: OfficialCatalogEntry[];
+  updatedAt: string;
+}
+
+export interface OfficialCatalogWithdrawal {
+  id: string;
+  version: string;
+  reason: string;
+  at: string;
+}
+
+export interface BuiltOfficialCatalogProfile {
+  plugins: PluginManifest[];
+  withdrawals: OfficialCatalogWithdrawal[];
 }
 
 export interface PluginRegistryQuery {

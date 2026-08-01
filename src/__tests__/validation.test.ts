@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
-import { buildOfficialDefaultsProfile, buildRegistryIndex, validatePluginManifest } from "../validation";
-import type { OfficialDefaultsProfile, PluginManifest } from "../types";
+import {
+  buildOfficialCatalogProfile,
+  buildOfficialDefaultsProfile,
+  buildRegistryIndex,
+  validatePluginManifest,
+} from "../validation";
+import type { OfficialCatalogProfile, OfficialDefaultsProfile, PluginManifest } from "../types";
 
 const VALID_SRI = `sha256-${"A".repeat(43)}=`;
 
@@ -124,5 +129,60 @@ describe("official defaults profile", () => {
       plugins: [], updatedAt: "2026-08-01T00:00:00Z",
     };
     expect(buildOfficialDefaultsProfile(value, [])).toEqual(value);
+  });
+});
+
+describe("official catalog lifecycle profile", () => {
+  const profile = (): OfficialCatalogProfile => ({
+    schemaVersion: "1",
+    id: "official-plugins",
+    updatedAt: "2026-08-03T00:00:00Z",
+    entries: [
+      {
+        id: "active-plugin",
+        version: "1.2.3",
+        state: "publish",
+      },
+      {
+        id: "withdrawn-plugin",
+        version: "1.2.2",
+        state: "withdraw",
+        reason: "Upstream release was revoked",
+        at: "2026-08-03T00:00:00Z",
+      },
+    ],
+  });
+
+  it("emits only published plugins and retains auditable withdrawals", () => {
+    const withdrawnManifest = manifest("withdrawn-plugin");
+    withdrawnManifest.status = "withdrawn";
+    withdrawnManifest.version = "1.2.2";
+    const built = buildOfficialCatalogProfile(
+      profile(),
+      [manifest("active-plugin"), withdrawnManifest],
+    );
+    expect(built.plugins.map(({ id }) => id)).toEqual(["active-plugin"]);
+    expect(built.withdrawals).toEqual([
+      {
+        id: "withdrawn-plugin",
+        version: "1.2.2",
+        reason: "Upstream release was revoked",
+        at: "2026-08-03T00:00:00Z",
+      },
+    ]);
+  });
+
+  it("rejects duplicate ids and invalid active versions", () => {
+    const duplicate = profile();
+    duplicate.entries[1] = { ...duplicate.entries[0] };
+    expect(() => buildOfficialCatalogProfile(duplicate, [manifest("active-plugin")])).toThrow(
+      /Duplicate official catalog plugin id/,
+    );
+    const mismatch = profile();
+    mismatch.entries = [mismatch.entries[0]];
+    mismatch.entries[0].version = "2.0.0";
+    expect(() => buildOfficialCatalogProfile(mismatch, [manifest("active-plugin")])).toThrow(
+      /expects 2.0.0/,
+    );
   });
 });

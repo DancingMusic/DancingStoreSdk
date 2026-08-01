@@ -3,8 +3,13 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import Ajv2020 from "ajv/dist/2020.js";
 import addFormats from "ajv-formats";
-import { assertPluginManifest, buildOfficialDefaultsProfile, buildRegistryIndex } from "../src/validation";
-import type { OfficialDefaultsProfile, PluginManifest } from "../src/types";
+import {
+  assertPluginManifest,
+  buildOfficialCatalogProfile,
+  buildOfficialDefaultsProfile,
+  buildRegistryIndex,
+} from "../src/validation";
+import type { OfficialCatalogProfile, OfficialDefaultsProfile, PluginManifest } from "../src/types";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const registryDirectory = resolve(root, "registry");
@@ -52,23 +57,8 @@ if (!validateOfficialCatalogSchema(officialCatalogProfile)) {
   const details = (validateOfficialCatalogSchema.errors ?? []).map((error) => `${error.instancePath || "/"} ${error.message}`).join("\n");
   throw new Error(`official-catalog.json does not match official-catalog.schema.json:\n${details}`);
 }
-const profile = officialCatalogProfile as {
-  updatedAt: string;
-  entries: Array<{ id: string; version: string }>;
-};
-const manifestsById = new Map(manifests.map((manifest) => [manifest.id, manifest]));
-const selectedIds = new Set<string>();
-const officialPlugins = profile.entries.map((entry) => {
-  if (selectedIds.has(entry.id)) throw new Error(`Duplicate official catalog plugin id: ${entry.id}`);
-  selectedIds.add(entry.id);
-  const manifest = manifestsById.get(entry.id);
-  if (!manifest) throw new Error(`Official catalog plugin is not registered: ${entry.id}`);
-  if (manifest.status !== "published") throw new Error(`Official catalog plugin is not published: ${entry.id}`);
-  if (manifest.version !== entry.version) {
-    throw new Error(`Official catalog ${entry.id} expects ${entry.version}, registry has ${manifest.version}`);
-  }
-  return manifest;
-}).sort((left, right) => left.id.localeCompare(right.id));
+const profile = officialCatalogProfile as OfficialCatalogProfile;
+const { plugins: officialPlugins } = buildOfficialCatalogProfile(profile, manifests);
 const officialCatalogOutput = `${JSON.stringify({
   schemaVersion: "1",
   generatedAt: profile.updatedAt,

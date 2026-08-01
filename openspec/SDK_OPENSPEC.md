@@ -23,8 +23,10 @@
 - `schema/official-defaults.schema.json` 定义官方预置 profile，构建产物
   `dist/official-defaults.json` 由生成器确定性写出，禁止手工编辑。
 - `profiles/official-catalog.json` 是官方插件源的精确版本允许列表；Registry
-  中存在记录不代表自动进入官方源。生成的 `dist/official-catalog.json`
-  才是 StoreService 验证和签名的目录 payload。
+  中存在记录不代表自动进入官方源。每项使用 `publish` / `withdraw`
+  生命周期；`withdraw` 必须记录审核原因和时间。生成的
+  `dist/official-catalog.json` 只包含 `publish` 项，才是 StoreService 验证和
+  签名的 active payload。
 
 ## Plugin manifest
 
@@ -72,8 +74,10 @@ StoreService 使用统一扁平签名信封发布目录：数字 `schemaVersion`
 写入生成目录或输出到日志。
 
 官方目录 profile 中的每项必须对应唯一、状态为 `published`、版本精确匹配
-且具有 SHA-256 与 `runtimeId` 的 manifest。空 profile 合法；未选择或已撤回
-记录可以保留为审核历史，但不得出现在 StoreService 发布输入中。
+且具有 SHA-256 与 `runtimeId` 的 manifest，才能标记为 `publish`。标记为
+`withdraw` 的精确版本保留 `reason` / `at` 审核记录和 Store 来源，但不得写入
+active payload 或 artifact 列表；它只写入 StoreService 发布输入的控制面
+`withdrawals`。同一插件 id 在 profile 中只能有一项。空 profile 合法。
 
 ## Official defaults profile
 
@@ -106,6 +110,8 @@ StoreService 使用统一扁平签名信封发布目录：数字 `schemaVersion`
 - Registry 输出按插件 `id` 排序，且相同输入产生相同内容。
 - `published` 插件的 `runtimeId` 必须存在、格式合法且在发布集合中唯一。
 - 官方预置输出按 `order` 排序，并校验引用存在、状态、版本和默认项。
+- 官方目录 profile 校验 `publish` / `withdraw` 状态、下架原因、时间和唯一 id；
+  active payload 只包含 `publish` 项。
 - URL 使用 HTTPS；版本、日期、权限、能力和许可证字段均经过校验。
 - 下载并验证每一个 `published` canonical/mirror artifact 的字节上限与
   SHA-256，禁止重定向且失败时不得发布目录。

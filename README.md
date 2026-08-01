@@ -11,7 +11,7 @@ DancingStore 是 DancingMusic 视觉插件的公开 Registry：收集独立 `Dan
 | `registry/*.json` | 可审计的插件 manifest，一项插件一个文件 |
 | `schema/plugin-manifest.schema.json` | Draft 2020-12 JSON Schema |
 | `profiles/official-defaults.json` | 官方预置插件精确版本、顺序和安装角色 |
-| `profiles/official-catalog.json` | 官方插件源允许发布的精确版本集合 |
+| `profiles/official-catalog.json` | 官方插件源逐项上架/下架状态、原因和时间 |
 | `schema/official-defaults.schema.json` | 官方预置 profile JSON Schema |
 | `dist/registry.json` | 从 manifest 确定性生成的公开索引，请勿手工编辑 |
 | `dist/official-defaults.json` | 经 Registry 交叉校验后生成的官方预置 profile |
@@ -59,8 +59,10 @@ Manifest 记录身份、版本、发布者、源码来源、许可证、协议�
 是加载后的实例身份；宿主不得通过删除前缀来猜测二者映射。
 
 Registry 中存在 manifest 不表示它自动进入官方源。只有
-`profiles/official-catalog.json` 选择的精确 `published` 版本才会写入
-`dist/official-catalog.json` 和 StoreService 发布输入。
+`profiles/official-catalog.json` 中 `state: "publish"` 的精确版本才会写入
+`dist/official-catalog.json` active payload 和 artifact 列表。`state: "withdraw"` 项在
+profile 中保留可审计的 `reason` / `at`，并写入 StoreService 发布输入的控制面
+`withdrawals`，但不会出现在宿主可见目录。
 
 分发入口必须：
 

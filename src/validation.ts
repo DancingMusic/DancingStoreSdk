@@ -7,6 +7,8 @@ import {
   type PluginPermission,
   type PluginRegistryIndex,
   type OfficialDefaultsProfile,
+  type OfficialCatalogProfile,
+  type BuiltOfficialCatalogProfile,
 } from "./types";
 
 const capabilities = new Set<PluginCapability>([
@@ -204,4 +206,67 @@ export function buildOfficialDefaultsProfile(
 ): OfficialDefaultsProfile {
   assertOfficialDefaultsProfile(profile, manifests);
   return { ...profile, plugins: [...profile.plugins].sort((a, b) => a.order - b.order) };
+}
+
+export function buildOfficialCatalogProfile(
+  profile: OfficialCatalogProfile,
+  manifests: readonly PluginManifest[],
+): BuiltOfficialCatalogProfile {
+  if (
+    !isRecord(profile) ||
+    profile.schemaVersion !== "1" ||
+    profile.id !== "official-plugins" ||
+    !Array.isArray(profile.entries)
+  ) {
+    throw new Error("Official catalog profile is invalid");
+  }
+  if (!date.test(profile.updatedAt) || Number.isNaN(Date.parse(profile.updatedAt))) {
+    throw new Error("Official catalog updatedAt must be an ISO 8601 UTC timestamp");
+  }
+  const manifestsById = new Map(manifests.map((manifest) => [manifest.id, manifest]));
+  const ids = new Set<string>();
+  const plugins: PluginManifest[] = [];
+  const withdrawals: BuiltOfficialCatalogProfile["withdrawals"] = [];
+  for (const entry of profile.entries) {
+    if (ids.has(entry.id)) throw new Error(`Duplicate official catalog plugin id: ${entry.id}`);
+    ids.add(entry.id);
+    const manifest = manifestsById.get(entry.id);
+    if (!manifest) throw new Error(`Official catalog plugin is not registered: ${entry.id}`);
+    if (manifest.version !== entry.version) {
+      throw new Error(`Official catalog ${entry.id} expects ${entry.version}, registry has ${manifest.version}`);
+    }
+    if (entry.state === "withdraw") {
+      if (
+        typeof entry.reason !== "string" ||
+        !entry.reason.trim() ||
+        entry.reason.length > 500 ||
+        typeof entry.at !== "string" ||
+        !date.test(entry.at) ||
+        Number.isNaN(Date.parse(entry.at))
+      ) {
+        throw new Error(`Official catalog ${entry.id} withdrawal requires reason and at`);
+      }
+      if (Date.parse(entry.at) > Date.parse(profile.updatedAt)) {
+        throw new Error(`Official catalog ${entry.id} audit timestamp exceeds updatedAt`);
+      }
+      withdrawals.push({ id: entry.id, version: entry.version, reason: entry.reason, at: entry.at });
+      continue;
+    }
+    if (entry.state !== "publish") {
+      throw new Error(`Official catalog ${entry.id} has an unsupported lifecycle status`);
+    }
+    if (entry.reason !== undefined || entry.at !== undefined) {
+      throw new Error(`Official catalog ${entry.id} publish entry must not declare reason or at`);
+    }
+    if (manifest.status !== "published") {
+      throw new Error(`Official catalog plugin is not published: ${entry.id}`);
+    }
+    if (!manifest.runtimeId || !manifest.distribution.integrity) {
+      throw new Error(`Official catalog ${entry.id} is missing runtimeId or integrity`);
+    }
+    plugins.push(manifest);
+  }
+  const byId = <T extends { id: string }>(left: T, right: T) =>
+    left.id < right.id ? -1 : left.id > right.id ? 1 : 0;
+  return { plugins: plugins.sort(byId), withdrawals: withdrawals.sort(byId) };
 }

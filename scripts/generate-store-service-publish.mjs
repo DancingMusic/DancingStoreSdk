@@ -2,11 +2,13 @@ import { createHash } from "node:crypto";
 import { readFile, writeFile } from "node:fs/promises";
 
 const REGISTRY_PATH = "dist/official-catalog.json";
+const PROFILE_PATH = "profiles/official-catalog.json";
 const PUBLISHED_REGISTRY_PATH = "official-catalog.json";
 const OUTPUT_PATH = "dist/store-service-publish.json";
 const MAX_ARTIFACT_BYTES = 10 * 1024 * 1024;
 const root = new URL("../", import.meta.url);
 const registryUrl = new URL(REGISTRY_PATH, root);
+const profileUrl = new URL(PROFILE_PATH, root);
 const outputUrl = new URL(OUTPUT_PATH, root);
 const checkOnly = process.argv.includes("--check");
 
@@ -20,7 +22,9 @@ function sha256HexFromSri(integrity, id) {
 
 const registryBytes = await readFile(registryUrl);
 const registry = JSON.parse(registryBytes.toString("utf8"));
+const profile = JSON.parse(await readFile(profileUrl, "utf8"));
 if (!Array.isArray(registry.plugins)) throw new Error("generated registry has no plugins array");
+if (!Array.isArray(profile.entries)) throw new Error("official catalog profile has no entries array");
 
 const artifacts = registry.plugins
   .map((plugin) => ({
@@ -28,7 +32,9 @@ const artifacts = registry.plugins
     runtimeId: plugin.runtimeId,
     version: plugin.version,
     url: plugin.distribution.url,
-    ...(plugin.distribution.mirrors ? { mirrors: plugin.distribution.mirrors } : {}),
+    ...(plugin.distribution.mirrors
+      ? { mirrors: plugin.distribution.mirrors.map((mirror) => mirror.url) }
+      : {}),
     integrity: plugin.distribution.integrity,
     sha256Hex: sha256HexFromSri(plugin.distribution.integrity, plugin.id),
     maxBytes: MAX_ARTIFACT_BYTES,
@@ -41,6 +47,10 @@ const publishInput = {
   registryPath: PUBLISHED_REGISTRY_PATH,
   payloadSha256: createHash("sha256").update(registryBytes).digest("hex"),
   artifacts,
+  withdrawals: profile.entries
+    .filter((entry) => entry.state === "withdraw")
+    .map(({ id, version, reason, at }) => ({ id, version, reason, at }))
+    .sort((left, right) => left.id.localeCompare(right.id)),
 };
 const output = `${JSON.stringify(publishInput, null, 2)}\n`;
 
@@ -48,8 +58,8 @@ if (checkOnly) {
   let existing = "";
   try { existing = await readFile(outputUrl, "utf8"); } catch { /* reported below */ }
   if (existing !== output) throw new Error(`${OUTPUT_PATH} is stale; run npm run store-service:generate`);
-  console.log(`Validated StoreService publish input for ${artifacts.length} plugins`);
+  console.log(`Validated StoreService publish input for ${artifacts.length} plugins and ${publishInput.withdrawals.length} withdrawals`);
 } else {
   await writeFile(outputUrl, output);
-  console.log(`Generated StoreService publish input for ${artifacts.length} plugins at ${OUTPUT_PATH}`);
+  console.log(`Generated StoreService publish input for ${artifacts.length} plugins and ${publishInput.withdrawals.length} withdrawals at ${OUTPUT_PATH}`);
 }
