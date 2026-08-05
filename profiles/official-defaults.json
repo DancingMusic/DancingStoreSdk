@@ -3,25 +3,25 @@
   "schemaVersion": "1",
   "id": "official-defaults",
   "channel": "stable",
-  "revision": "1.1.0",
-  "defaultPluginId": "dance-plugin-beat-lyric-cuts",
+  "revision": "1.2.0",
+  "defaultPluginId": "beat-lyric-cuts",
   "plugins": [
     {
-      "id": "dance-plugin-beat-lyric-cuts",
+      "id": "beat-lyric-cuts",
       "version": "1.0.0",
       "order": 0,
       "installMode": "preinstalled",
       "updatePolicy": "notify"
     },
     {
-      "id": "dance-plugin-mineradio",
+      "id": "mineradio",
       "version": "1.1.2",
       "order": 10,
       "installMode": "preinstalled",
       "updatePolicy": "notify"
     },
     {
-      "id": "dance-plugin-sonic-topography",
+      "id": "sonic-topography",
       "version": "1.0.2",
       "order": 20,
       "installMode": "recommended",

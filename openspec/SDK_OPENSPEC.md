@@ -28,11 +28,14 @@
 每条记录 MUST 包含：
 
 - `schemaVersion`：当前为 `1`。
-- `id`、`name`、`summary`、`version`：稳定标识和 SemVer 版本。
+- `id`、`name`、`summary`、`version`：稳定标识和 SemVer 版本。`id` MUST
+  exactly equal the exported `DancePlugin.config.id`; it is the runtime,
+  cache and packaged-preset identity, not a repository-name prefix.
 - `publisher`、`repository`：发布者及可追溯源码仓库。
 - `license`：许可证名称、许可证 URL 和商业使用标记。
 - `compatibility`：依赖的 DancePlugin 协议包及 SemVer 范围，可选宿主版本范围。
-- `distribution`：固定版本的 HTTPS ESM 构建入口，可选 SRI 完整性值。
+- `distribution`：固定版本的 HTTPS ESM 构建入口和必填 SHA-256 SRI
+  完整性值。
 - `distribution.mirrors`：可选的国内/国际固定版本镜像。为兼容 v1，
   `distribution.url` 仍是规范入口；所有镜像必须分发与该入口相同的字节，
   并共用 `distribution.integrity`。
@@ -43,6 +46,8 @@
 
 Registry MUST NOT 使用浮动分支 URL 作为分发入口。分发 URL 必须固定到 tag 或不可变提交。
 镜像同样不得使用浮动分支，且同一地域最多声明一个入口。
+已发布 artifact 的摘要是宿主验证、离线 A seed 和更新事务的共同前提；没有
+摘要的记录不得标记为 `published`。
 
 ## Submission and distribution
 

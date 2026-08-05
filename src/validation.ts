@@ -81,8 +81,9 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
     if (typeof value.distribution.url === "string" && /@(main|master|head)(?:\/|$)/i.test(value.distribution.url)) issue("$.distribution.url", "must pin a tag or immutable commit, not a branch");
     if (typeof value.version === "string" && typeof value.distribution.url === "string" &&
       !value.distribution.url.includes(value.version) && !/[a-f0-9]{40}/i.test(value.distribution.url)) issue("$.distribution.url", "must contain the manifest version or a full commit hash");
-    if (value.distribution.integrity !== undefined &&
-      (typeof value.distribution.integrity !== "string" || !/^sha(256|384|512)-[A-Za-z0-9+/]+={0,2}$/.test(value.distribution.integrity))) issue("$.distribution.integrity", "must be an SRI sha256/384/512 value");
+    if (typeof value.distribution.integrity !== "string" || !/^sha256-[A-Za-z0-9+/]{43}=$/.test(value.distribution.integrity)) {
+      issue("$.distribution.integrity", "must be a SHA-256 SRI value");
+    }
     if (value.distribution.mirrors !== undefined) {
       if (!Array.isArray(value.distribution.mirrors) || value.distribution.mirrors.length === 0 || value.distribution.mirrors.length > 2) {
         issue("$.distribution.mirrors", "must contain one or two regional mirrors");
@@ -106,7 +107,6 @@ export function validatePluginManifest(value: unknown): ManifestValidationResult
           }
         });
       }
-      if (value.distribution.integrity === undefined) issue("$.distribution.integrity", "is required when mirrors are declared");
     }
   }
 

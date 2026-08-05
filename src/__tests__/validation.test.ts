@@ -8,7 +8,7 @@ const manifest = (id = "example-plugin"): PluginManifest => ({
   repository: "https://github.com/example/plugin",
   license: { name: "MIT", url: "https://example.com/license", commercialUse: true },
   compatibility: { protocolPackage: "@dancingmusic/plugin-sdk", protocolVersion: "^1.1.0" },
-  distribution: { url: "https://cdn.example.com/example-plugin@1.2.3/index.js", format: "esm" },
+  distribution: { url: "https://cdn.example.com/example-plugin@1.2.3/index.js", format: "esm", integrity: `sha256-${"A".repeat(43)}=` },
   capabilities: ["audio-reactive"], permissions: [], tags: ["example"], status: "published",
   submittedAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-02T00:00:00Z",
 });
@@ -17,7 +17,7 @@ describe("plugin manifest validation", () => {
   it("accepts a valid manifest", () => expect(validatePluginManifest(manifest())).toEqual({ valid: true, issues: [] }));
   it("accepts pinned regional mirrors and release metadata", () => {
     const value = manifest();
-    value.distribution.integrity = "sha256-YWJj";
+    value.distribution.integrity = `sha256-${"B".repeat(43)}=`;
     value.distribution.mirrors = [
       { region: "global", url: "https://global.example.com/example-plugin@1.2.3/index.js" },
       { region: "china", url: "https://china.example.com/example-plugin@1.2.3/index.js" },
@@ -28,6 +28,7 @@ describe("plugin manifest validation", () => {
   });
   it("requires integrity and unique regions for mirrors", () => {
     const value = manifest();
+    delete (value.distribution as Partial<typeof value.distribution>).integrity;
     value.distribution.mirrors = [
       { region: "china", url: "https://one.example.com/example-plugin@1.2.3/index.js" },
       { region: "china", url: "https://two.example.com/example-plugin@1.2.3/index.js" },
@@ -42,7 +43,7 @@ describe("plugin manifest validation", () => {
   });
   it("rejects a floating mirror branch", () => {
     const value = manifest();
-    value.distribution.integrity = "sha256-YWJj";
+    value.distribution.integrity = `sha256-${"B".repeat(43)}=`;
     value.distribution.mirrors = [{ region: "global", url: "https://cdn.example.com/plugin@main/index.js" }];
     expect(validatePluginManifest(value).issues.some((entry) => entry.path === "$.distribution.mirrors[0].url")).toBe(true);
   });

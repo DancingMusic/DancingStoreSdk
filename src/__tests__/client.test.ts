@@ -7,7 +7,7 @@ const plugin: PluginManifest = {
   publisher: { name: "Example", url: "https://example.com" }, repository: "https://github.com/example/plugin",
   license: { name: "MIT", url: "https://example.com/license", commercialUse: true },
   compatibility: { protocolPackage: "@dancingmusic/plugin-sdk", protocolVersion: "^1.0.0" },
-  distribution: { url: "https://cdn.example.com/plugin@1.0.0/index.js", format: "esm" },
+  distribution: { url: "https://cdn.example.com/plugin@1.0.0/index.js", format: "esm", integrity: `sha256-${"A".repeat(43)}=` },
   capabilities: ["audio-reactive"], permissions: [], tags: ["terrain"], status: "published",
   submittedAt: "2026-01-01T00:00:00Z", updatedAt: "2026-01-01T00:00:00Z",
 };

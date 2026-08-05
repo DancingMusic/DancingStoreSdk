@@ -37,7 +37,7 @@ export interface PluginCompatibility {
 export interface PluginDistribution {
   url: string;
   format: "esm";
-  integrity?: string;
+  integrity: string;
   mirrors?: PluginDistributionMirror[];
 }
 

@@ -1,7 +1,7 @@
 {
   "$schema": "../schema/plugin-manifest.schema.json",
   "schemaVersion": "1",
-  "id": "dance-plugin-beat-lyric-cuts",
+  "id": "beat-lyric-cuts",
   "name": "Beat Lyric Cuts",
   "summary": "Beat-synced lyric sections, cover slices and kinetic typography for the DancingMusic stage.",
   "version": "1.0.0",

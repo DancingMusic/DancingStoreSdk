@@ -31,7 +31,7 @@ const visualizers = await store.list({
   status: "published",
 });
 
-const mineradio = await store.get("dance-plugin-mineradio");
+const mineradio = await store.get("mineradio");
 ```
 
 也可以直接消费 npm 包中的 JSON：
@@ -56,7 +56,7 @@ Manifest 记录身份、版本、发布者、源码来源、许可证、协议�
 - 固定到与 manifest 一致的版本 tag 或完整 commit；
 - 提供 ESM 构建；
 - 不使用 `main`、`master` 或其他浮动分支；
-- 如填写 `integrity`，使用合法的 SRI `sha256` / `sha384` / `sha512` 值。
+- 必须填写 `integrity`，并使用合法的 SHA-256 SRI 值。
 
 许可证不是装饰字段。宿主和用户可据 `commercialUse` 在加载前识别非商业限制；具体权利仍以插件仓库中的许可证原文为准。
 
